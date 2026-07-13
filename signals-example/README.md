@@ -64,6 +64,12 @@ Async / await patterns:
 - Async click handlers
 - Effect cleanup that aborts in-flight work
 
+### 12-routing.html
+Client-side History API routing:
+- `Router` / `Route` / `A` / `navigate`
+- `useParams` and `useLocation`
+- 404 catch-all (`*`)
+
 ## Running the Examples
 
 1. Open any HTML file in a modern web browser
