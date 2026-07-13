@@ -29,7 +29,7 @@ function runCleanups(effect, cleanupFnRef) {
   }
 }
 
-export function createEffect(fn) {
+function createTrackedEffect(fn, { registerOnComponent } = {}) {
   const cleanupFnRef = { current: null };
 
   const effect = () => {
@@ -37,7 +37,6 @@ export function createEffect(fn) {
       return;
     }
 
-    // Drop stale subscriptions before re-tracking
     clearDeps(effect);
     runCleanups(effect, cleanupFnRef);
 
@@ -73,8 +72,7 @@ export function createEffect(fn) {
 
   effect._dispose = dispose;
 
-  // Only create effect on first render when inside a component
-  if (currentComponent) {
+  if (registerOnComponent && currentComponent) {
     if (!currentComponent._effectsInitialized) {
       currentComponent._effects.push(effect);
       effect();
@@ -82,8 +80,23 @@ export function createEffect(fn) {
       return () => {};
     }
   } else {
+    if (currentComponent) {
+      if (!currentComponent._bindings) {
+        currentComponent._bindings = [];
+      }
+      currentComponent._bindings.push(dispose);
+    }
     effect();
   }
 
   return dispose;
+}
+
+export function createEffect(fn) {
+  return createTrackedEffect(fn, { registerOnComponent: true });
+}
+
+/** DOM text/prop bindings — always subscribe; disposed via node or owner._bindings. */
+export function createBindingEffect(fn) {
+  return createTrackedEffect(fn, { registerOnComponent: false });
 }

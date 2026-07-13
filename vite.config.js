@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
+import { fineGrainedJsx } from './frontend-core/jsx-compiler-new/fine-grained-jsx.vite.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -8,6 +9,7 @@ const __dirname = dirname(__filename);
 const jsxRuntimePath = resolve(__dirname, './frontend-core/jsx-compiler-new');
 
 export default defineConfig({
+  plugins: [fineGrainedJsx()],
   esbuild: {
     jsx: 'automatic',
     jsxImportSource: './frontend-core/jsx-compiler-new'

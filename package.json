@@ -8,7 +8,8 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@babel/core": "^7.29.7",
+    "@babel/plugin-syntax-jsx": "^7.29.7",
     "vite": "^5.0.0"
   }
 }
-

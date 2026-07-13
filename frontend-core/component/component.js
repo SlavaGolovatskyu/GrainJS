@@ -37,6 +37,7 @@ export function createComponent(ComponentFn) {
       _children: new Map(),
       _renderEffect: null,
       _currentFunctions: null,
+      _bindings: [],
 
       registerComponent() {
         // No-op: JSX passes function types directly
@@ -102,12 +103,9 @@ export function createComponent(ComponentFn) {
 
           const isFirstRender = !this._effectsInitialized;
           let result = this._componentFn(this._props);
-          if (isFirstRender) {
-            this._effectsInitialized = true;
-          }
 
-          setCurrentComponent(prev);
-
+          // Keep owner as currentComponent while building DOM so text/prop
+          // bindings can register and track signals without re-running this fn.
           result = normalizeRenderResult(result, this);
 
           if (!this._element) {
@@ -122,6 +120,12 @@ export function createComponent(ComponentFn) {
               '0'
             );
           }
+
+          if (isFirstRender) {
+            this._effectsInitialized = true;
+          }
+
+          setCurrentComponent(prev);
         };
 
         // createEffect registers on this (currentComponent) and runs immediately

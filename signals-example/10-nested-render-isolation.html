@@ -107,11 +107,18 @@
       border-radius: 999px;
       white-space: nowrap;
     }
+    .pulse {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 4px 0 8px;
+    }
     .value {
       font-size: 1.75rem;
       font-weight: bold;
       color: #2f5d44;
-      margin: 6px 0 10px;
+      margin: 0;
     }
     .hint {
       margin: 0;
@@ -136,8 +143,8 @@
   <div class="container">
     <h1>Nested Render Isolation</h1>
     <p class="subtitle">
-      Deep custom-component tree. Each node shows how many times its render function ran.
-      Updating a leaf should only bump that leaf — not App, trunks, siblings, or StaticPanel.
+      Every tier has its own Increment. Poke LeftTrunk / NestedB / etc. — only that
+      node&apos;s value should change; <code>renders</code> badges should stay at 1.
     </p>
     <div id="app"></div>
   </div>

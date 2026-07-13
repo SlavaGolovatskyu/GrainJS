@@ -1,4 +1,5 @@
 import { Fragment } from '../jsx-compiler-new/jsx-runtime.js';
+import { createBindingEffect } from '../../signals-core/createEffect/createEffect.js';
 
 const BOOLEAN_ATTRS = new Set([
   'disabled',
@@ -17,6 +18,8 @@ const BOOLEAN_ATTRS = new Set([
 
 const LISTENERS = Symbol('listeners');
 const PREV_PROPS = Symbol('prevProps');
+const TEXT_DISPOSE = Symbol('textDispose');
+const PROP_DISPOSES = Symbol('propDisposes');
 
 function resolveValue(value, owner) {
   if (
@@ -46,6 +49,101 @@ function isComponentType(type) {
   return typeof type === 'function' && !isFragmentType(type);
 }
 
+function isAccessor(value) {
+  return typeof value === 'function';
+}
+
+function toText(value) {
+  if (value == null || value === false || value === true) return '';
+  return String(value);
+}
+
+function disposeTextBinding(node) {
+  if (node && node[TEXT_DISPOSE]) {
+    node[TEXT_DISPOSE]();
+    node[TEXT_DISPOSE] = null;
+  }
+}
+
+function bindText(node, accessor) {
+  disposeTextBinding(node);
+  node[TEXT_DISPOSE] = createBindingEffect(() => {
+    const next = toText(accessor());
+    if (node.nodeValue !== next) {
+      node.nodeValue = next;
+    }
+  });
+  return node;
+}
+
+function createTextFromValue(value) {
+  if (isAccessor(value)) {
+    return bindText(document.createTextNode(''), value);
+  }
+  return document.createTextNode(toText(value));
+}
+
+function disposePropBinding(el, key) {
+  const map = el[PROP_DISPOSES];
+  if (map?.has(key)) {
+    map.get(key)();
+    map.delete(key);
+  }
+}
+
+function setStaticProp(el, key, value) {
+  if (key === 'className' || key === 'class') {
+    el.className = value == null ? '' : String(value);
+    return;
+  }
+
+  if (key === 'style') {
+    if (typeof value === 'string') {
+      el.style.cssText = value;
+    } else if (value && typeof value === 'object') {
+      el.style.cssText = '';
+      Object.assign(el.style, value);
+    } else {
+      el.style.cssText = '';
+    }
+    return;
+  }
+
+  if (key === 'value' && 'value' in el) {
+    if (el.value !== String(value ?? '')) {
+      el.value = value == null ? '' : value;
+    }
+    return;
+  }
+
+  if (BOOLEAN_ATTRS.has(key)) {
+    const on = Boolean(value);
+    el[key] = on;
+    if (on) el.setAttribute(key, '');
+    else el.removeAttribute(key);
+    return;
+  }
+
+  if (value == null || value === false) {
+    el.removeAttribute(key);
+  } else {
+    el.setAttribute(key, value === true ? '' : String(value));
+  }
+}
+
+function bindProp(el, key, accessor) {
+  disposePropBinding(el, key);
+  if (!el[PROP_DISPOSES]) {
+    el[PROP_DISPOSES] = new Map();
+  }
+  el[PROP_DISPOSES].set(
+    key,
+    createBindingEffect(() => {
+      setStaticProp(el, key, accessor());
+    })
+  );
+}
+
 function normalizeChildren(children) {
   if (children == null || children === false) return [];
   const list = Array.isArray(children) ? children.flat(Infinity) : [children];
@@ -73,13 +171,16 @@ export function applyProps(el, props, owner) {
       if (ev && listeners.has(ev)) {
         el.removeEventListener(ev, listeners.get(ev));
         listeners.delete(ev);
-      } else if (key === 'className' || key === 'class') {
-        el.className = '';
-      } else if (BOOLEAN_ATTRS.has(key)) {
-        el.removeAttribute(key);
-        el[key] = false;
-      } else if (key !== 'style') {
-        el.removeAttribute(key);
+      } else {
+        disposePropBinding(el, key);
+        if (key === 'className' || key === 'class') {
+          el.className = '';
+        } else if (BOOLEAN_ATTRS.has(key)) {
+          el.removeAttribute(key);
+          el[key] = false;
+        } else if (key !== 'style') {
+          el.removeAttribute(key);
+        }
       }
     }
   }
@@ -91,6 +192,7 @@ export function applyProps(el, props, owner) {
     const ev = eventName(key);
 
     if (ev) {
+      disposePropBinding(el, key);
       if (typeof value === 'function') {
         const prevFn = listeners.get(ev);
         if (prevFn) el.removeEventListener(ev, prevFn);
@@ -100,43 +202,13 @@ export function applyProps(el, props, owner) {
       continue;
     }
 
-    if (key === 'className' || key === 'class') {
-      el.className = value == null ? '' : String(value);
+    if (isAccessor(value)) {
+      bindProp(el, key, value);
       continue;
     }
 
-    if (key === 'style') {
-      if (typeof value === 'string') {
-        el.style.cssText = value;
-      } else if (value && typeof value === 'object') {
-        el.style.cssText = '';
-        Object.assign(el.style, value);
-      } else {
-        el.style.cssText = '';
-      }
-      continue;
-    }
-
-    if (key === 'value' && 'value' in el) {
-      if (el.value !== String(value ?? '')) {
-        el.value = value == null ? '' : value;
-      }
-      continue;
-    }
-
-    if (BOOLEAN_ATTRS.has(key)) {
-      const on = Boolean(value);
-      el[key] = on;
-      if (on) el.setAttribute(key, '');
-      else el.removeAttribute(key);
-      continue;
-    }
-
-    if (value == null || value === false) {
-      el.removeAttribute(key);
-    } else {
-      el.setAttribute(key, value === true ? '' : String(value));
-    }
+    disposePropBinding(el, key);
+    setStaticProp(el, key, value);
   }
 
   el[PREV_PROPS] = next;
@@ -155,6 +227,20 @@ function clearChildRange(owner, pathPrefix) {
   }
 }
 
+function removeNode(parentEl, node, owner, path) {
+  clearChildRange(owner, path);
+  disposeTextBinding(node);
+  if (node?.[PROP_DISPOSES]) {
+    for (const dispose of node[PROP_DISPOSES].values()) {
+      dispose();
+    }
+    node[PROP_DISPOSES].clear();
+  }
+  if (node && node.parentNode === parentEl) {
+    parentEl.removeChild(node);
+  }
+}
+
 export function createDom(vdom, owner, path = '0') {
   if (vdom == null || vdom === false || vdom === true) {
     return document.createTextNode('');
@@ -162,6 +248,10 @@ export function createDom(vdom, owner, path = '0') {
 
   if (typeof vdom === 'string' || typeof vdom === 'number') {
     return document.createTextNode(String(vdom));
+  }
+
+  if (isAccessor(vdom)) {
+    return createTextFromValue(vdom);
   }
 
   if (Array.isArray(vdom)) {
@@ -202,6 +292,15 @@ export function createDom(vdom, owner, path = '0') {
 
 function replaceNode(parent, oldDom, newDom) {
   if (oldDom === newDom) return newDom;
+  if (oldDom) {
+    disposeTextBinding(oldDom);
+    if (oldDom[PROP_DISPOSES]) {
+      for (const dispose of oldDom[PROP_DISPOSES].values()) {
+        dispose();
+      }
+      oldDom[PROP_DISPOSES].clear();
+    }
+  }
   if (oldDom && oldDom.parentNode === parent) {
     parent.replaceChild(newDom, oldDom);
   } else if (parent) {
@@ -211,14 +310,18 @@ function replaceNode(parent, oldDom, newDom) {
 }
 
 function sameHostType(oldDom, vdom) {
-  if (typeof vdom === 'string' || typeof vdom === 'number') {
+  if (isAccessor(vdom) || typeof vdom === 'string' || typeof vdom === 'number') {
     return oldDom.nodeType === Node.TEXT_NODE;
   }
   if (vdom == null || typeof vdom !== 'object' || Array.isArray(vdom)) {
     return false;
   }
   if (isFragmentType(vdom.type) || Array.isArray(vdom)) {
-    return oldDom.nodeType === Node.ELEMENT_NODE && oldDom.style?.display === 'contents' && !oldDom.hasAttribute('data-component');
+    return (
+      oldDom.nodeType === Node.ELEMENT_NODE &&
+      oldDom.style?.display === 'contents' &&
+      !oldDom.hasAttribute('data-component')
+    );
   }
   if (isComponentType(vdom.type)) {
     return oldDom.nodeType === Node.ELEMENT_NODE && oldDom.hasAttribute('data-component');
@@ -233,14 +336,25 @@ function sameHostType(oldDom, vdom) {
 export function patchDom(parent, oldDom, newVdom, owner, path = '0') {
   if (newVdom == null || newVdom === false || newVdom === true) {
     clearChildRange(owner, path);
+    disposeTextBinding(oldDom);
     const empty = document.createTextNode('');
     return replaceNode(parent, oldDom, empty);
+  }
+
+  if (isAccessor(newVdom)) {
+    clearChildRange(owner, path);
+    if (oldDom && oldDom.nodeType === Node.TEXT_NODE) {
+      bindText(oldDom, newVdom);
+      return oldDom;
+    }
+    return replaceNode(parent, oldDom, createTextFromValue(newVdom));
   }
 
   if (typeof newVdom === 'string' || typeof newVdom === 'number') {
     clearChildRange(owner, path);
     const text = String(newVdom);
     if (oldDom && oldDom.nodeType === Node.TEXT_NODE) {
+      disposeTextBinding(oldDom);
       if (oldDom.nodeValue !== text) oldDom.nodeValue = text;
       return oldDom;
     }
@@ -249,7 +363,12 @@ export function patchDom(parent, oldDom, newVdom, owner, path = '0') {
 
   if (Array.isArray(newVdom)) {
     const kids = normalizeChildren(newVdom);
-    if (oldDom && oldDom.nodeType === Node.ELEMENT_NODE && oldDom.style?.display === 'contents' && !oldDom.hasAttribute('data-component')) {
+    if (
+      oldDom &&
+      oldDom.nodeType === Node.ELEMENT_NODE &&
+      oldDom.style?.display === 'contents' &&
+      !oldDom.hasAttribute('data-component')
+    ) {
       patchChildren(oldDom, kids, owner, path);
       return oldDom;
     }
@@ -259,7 +378,12 @@ export function patchDom(parent, oldDom, newVdom, owner, path = '0') {
 
   if (isFragmentType(newVdom.type)) {
     const kids = normalizeChildren(newVdom.children);
-    if (oldDom && oldDom.nodeType === Node.ELEMENT_NODE && oldDom.style?.display === 'contents' && !oldDom.hasAttribute('data-component')) {
+    if (
+      oldDom &&
+      oldDom.nodeType === Node.ELEMENT_NODE &&
+      oldDom.style?.display === 'contents' &&
+      !oldDom.hasAttribute('data-component')
+    ) {
       patchChildren(oldDom, kids, owner, path);
       return oldDom;
     }
@@ -307,8 +431,7 @@ function patchChildren(parentEl, newChildren, owner, path) {
     const newChild = newChildren[i];
 
     if (newChild === undefined) {
-      clearChildRange(owner, childPath);
-      if (oldNode) parentEl.removeChild(oldNode);
+      if (oldNode) removeNode(parentEl, oldNode, owner, childPath);
       continue;
     }
 
@@ -322,6 +445,16 @@ function patchChildren(parentEl, newChildren, owner, path) {
 }
 
 export function unmountDomTree(owner) {
+  if (owner?._bindings) {
+    owner._bindings.forEach((dispose) => {
+      try {
+        dispose();
+      } catch (error) {
+        console.error('Error disposing binding:', error);
+      }
+    });
+    owner._bindings = [];
+  }
   if (!owner?._children) return;
   for (const entry of owner._children.values()) {
     entry.instance?.unmount();
