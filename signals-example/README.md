@@ -57,6 +57,13 @@ Deep nesting + render isolation:
 - Per-component `renders` badges
 - Updating one leaf should not re-run ancestors or sibling branches
 
+### 11-async-requests.html
+Async / await patterns:
+- Debounced search with `fetch` + `AbortController`
+- Sequential await chains (user → posts)
+- Async click handlers
+- Effect cleanup that aborts in-flight work
+
 ## Running the Examples
 
 1. Open any HTML file in a modern web browser

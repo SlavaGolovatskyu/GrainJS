@@ -48,6 +48,7 @@ Only example `08-jsx-counter.html` works without a build tool (uses `jsx()` func
 | 08 | `08-jsx-counter.html` | Counter using jsx() directly | ❌ No |
 | 09 | `09-jsx-counter-vite.html` | Counter with full JSX syntax | ✅ Yes |
 | 10 | `10-nested-render-isolation.html` | Deep nesting; only owning leaf re-renders | ✅ Yes |
+| 11 | `11-async-requests.html` | async/await fetch, debounce, AbortController | ✅ Yes |
 
 ## Troubleshooting
 

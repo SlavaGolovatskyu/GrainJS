@@ -1,9 +1,9 @@
 import {
   setCurrentComponent,
   currentComponent,
-} from '../../signals-core/reactive-context/reactive-context.js';
-import { createEffect } from '../../signals-core/createEffect/createEffect.js';
-import { componentSignalRegistry } from '../../signals-core/createSignal/createSignal.js';
+} from '../../signals/reactive-context/reactive-context.js';
+import { createEffect } from '../../signals/createEffect/createEffect.js';
+import { componentSignalRegistry } from '../../signals/createSignal/createSignal.js';
 import { jsxCompiler } from '../jsx-compiler/jsx-compiler.js';
 import { createDom, patchDom, unmountDomTree } from '../dom/dom.js';
 

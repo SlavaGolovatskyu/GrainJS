@@ -49,7 +49,7 @@
 
   <script type="module">
     import { createSignal, createComponent, render } from '../index.js';
-    import { jsx } from '../frontend-core/jsx-compiler-new/jsx-runtime.js';
+    import { jsx } from '../core/jsx-compiler-new/jsx-runtime.js';
 
     const Counter = createComponent(() => {
       const [count, setCount] = createSignal(0);

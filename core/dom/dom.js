@@ -1,5 +1,5 @@
 import { Fragment } from '../jsx-compiler-new/jsx-runtime.js';
-import { createBindingEffect } from '../../signals-core/createEffect/createEffect.js';
+import { createBindingEffect } from '../../signals/createEffect/createEffect.js';
 
 const BOOLEAN_ATTRS = new Set([
   'disabled',

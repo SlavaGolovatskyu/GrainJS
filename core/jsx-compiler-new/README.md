@@ -15,7 +15,7 @@ export default defineConfig({
   esbuild: {
     jsxFactory: 'jsx',
     jsxFragment: 'Fragment',
-    jsxImportSource: './frontend-core/jsx-compiler-new'
+    jsxImportSource: './core/jsx-compiler-new'
   }
 });
 ```
@@ -23,7 +23,7 @@ export default defineConfig({
 Then you can write JSX in `.jsx` files:
 
 ```javascript
-import { jsx } from './frontend-core/jsx-compiler-new/jsx-runtime.js';
+import { jsx } from './core/jsx-compiler-new/jsx-runtime.js';
 
 const Counter = () => {
   const [count, setCount] = createSignal(0);
@@ -53,7 +53,7 @@ module.exports = {
       '@babel/plugin-transform-react-jsx',
       {
         runtime: 'automatic',
-        importSource: './frontend-core/jsx-compiler-new'
+        importSource: './core/jsx-compiler-new'
       }
     ]
   ]
@@ -65,7 +65,7 @@ module.exports = {
 If you can't use a build tool, you can use the `jsx()` function directly:
 
 ```javascript
-import { jsx } from './frontend-core/jsx-compiler-new/jsx-runtime.js';
+import { jsx } from './core/jsx-compiler-new/jsx-runtime.js';
 
 const Counter = () => {
   const [count, setCount] = createSignal(0);

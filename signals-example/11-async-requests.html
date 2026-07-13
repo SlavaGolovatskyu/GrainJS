@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Async Requests Example</title>
+  <style>
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      max-width: 720px;
+      margin: 40px auto;
+      padding: 20px;
+      background:
+        linear-gradient(165deg, #e7eef5 0%, #f4f0e8 48%, #ebe4d8 100%);
+      color: #1a222c;
+    }
+    .container {
+      background: rgba(255, 252, 247, 0.94);
+      padding: 28px;
+      border: 1px solid #c9c0b2;
+      border-radius: 3px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 1.7rem;
+    }
+    .lede {
+      margin: 0 0 24px;
+      color: #4a5560;
+      line-height: 1.45;
+    }
+    .panel {
+      margin-bottom: 28px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid #ddd4c6;
+    }
+    .panel:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    h2 {
+      margin: 0 0 8px;
+      font-size: 1.15rem;
+    }
+    .hint {
+      margin: 0 0 12px;
+      font-size: 0.92rem;
+      color: #5a6570;
+      line-height: 1.4;
+    }
+    .hint code, .meta code, .lede code {
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 0.88em;
+      background: #ebe4d6;
+      padding: 1px 5px;
+    }
+    input[type="search"],
+    input[type="number"] {
+      font: inherit;
+      padding: 8px 10px;
+      width: min(100%, 320px);
+      border: 1px solid #aeb8c2;
+      border-radius: 2px;
+      background: #fff;
+    }
+    button {
+      font: inherit;
+      padding: 8px 14px;
+      cursor: pointer;
+      border: 1px solid #2c4a5e;
+      background: #2c4a5e;
+      color: #f7f3eb;
+      border-radius: 2px;
+    }
+    button:hover {
+      background: #1e3544;
+    }
+    .meta {
+      margin: 10px 0;
+      font-size: 0.9rem;
+      color: #3d4752;
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .results, .posts {
+      margin: 8px 0 0;
+      padding-left: 1.2rem;
+    }
+    .results li, .posts li {
+      margin: 6px 0;
+    }
+    .results span {
+      display: block;
+      color: #667078;
+      font-size: 0.88rem;
+    }
+    .card {
+      margin: 10px 0;
+      padding: 12px 14px;
+      background: #f0ebe1;
+      border-left: 3px solid #2c4a5e;
+    }
+    .card h3 {
+      margin: 0 0 6px;
+      font-size: 1.05rem;
+    }
+    .card p {
+      margin: 0;
+      line-height: 1.4;
+    }
+    .log {
+      margin: 12px 0 0;
+      padding: 10px 12px;
+      background: #1a222c;
+      color: #d5e0ea;
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 0.78rem;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      max-height: 160px;
+      overflow: auto;
+    }
+    .empty {
+      color: #7a6000;
+      font-size: 0.92rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Async Requests</h1>
+    <p class="lede">
+      <code>async</code>/<code>await</code> with <code>fetch</code>, debounce,
+      <code>AbortController</code> cleanup in <code>createEffect</code>, sequential
+      chains, and async click handlers. Uses JSONPlaceholder.
+    </p>
+    <div id="app"></div>
+  </div>
+  <script type="module" src="./11-async-requests.jsx"></script>
+</body>
+</html>

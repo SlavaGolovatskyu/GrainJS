@@ -1,7 +1,7 @@
 {
   "name": "jsx-compiler-new",
   "version": "1.0.0",
-  "description": "React-like JSX runtime for frontend-core",
+  "description": "React-like JSX runtime for core",
   "type": "module",
   "main": "./jsx-runtime.js",
   "exports": {

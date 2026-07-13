@@ -7,7 +7,7 @@
 
 import { createSignal, createComponent, render } from '../index.js';
 // Vite should auto-inject this, but adding it explicitly to ensure it works
-import { jsx } from '../frontend-core/jsx-compiler-new/jsx-runtime.js';
+import { jsx } from '../core/jsx-compiler-new/jsx-runtime.js';
 
 export const Counter = createComponent(() => {
   const [count, setCount] = createSignal(0);

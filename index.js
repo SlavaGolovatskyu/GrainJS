@@ -3,7 +3,7 @@ export {
   createEffect, 
   createMemo,
   onCleanup
-} from './signals-core/index.js';
+} from './signals/index.js';
 
 export { 
   createComponent, 
@@ -12,4 +12,4 @@ export {
   jsxCompiler, 
   render,
   Fragment
-} from './frontend-core/index.js';
+} from './core/index.js';

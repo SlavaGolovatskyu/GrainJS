@@ -15,7 +15,7 @@ export default defineConfig({
   esbuild: {
     jsxFactory: 'jsx',
     jsxFragment: 'Fragment',
-    jsxImportSource: './frontend-core/jsx-compiler-new'
+    jsxImportSource: './core/jsx-compiler-new'
   }
 });
 ```
@@ -24,9 +24,9 @@ export default defineConfig({
 
 ```javascript
 // Counter.jsx
-import { jsx } from './frontend-core/jsx-compiler-new/jsx-runtime.js';
-import { createSignal } from '../../signals-core/createSignal/createSignal.js';
-import { createComponent } from '../../frontend-core/component/component.js';
+import { jsx } from './core/jsx-compiler-new/jsx-runtime.js';
+import { createSignal } from '../../signals/createSignal/createSignal.js';
+import { createComponent } from '../../core/component/component.js';
 
 const Counter = createComponent(() => {
   const [count, setCount] = createSignal(0);
@@ -55,9 +55,9 @@ render(Counter, document.getElementById('app'));
 If you can't use a build tool, you can call `jsx()` directly:
 
 ```javascript
-import { jsx } from './frontend-core/jsx-compiler-new/jsx-runtime.js';
-import { createSignal } from '../../signals-core/createSignal/createSignal.js';
-import { createComponent } from '../../frontend-core/component/component.js';
+import { jsx } from './core/jsx-compiler-new/jsx-runtime.js';
+import { createSignal } from '../../signals/createSignal/createSignal.js';
+import { createComponent } from '../../core/component/component.js';
 
 const Counter = createComponent(() => {
   const [count, setCount] = createSignal(0);
@@ -83,7 +83,7 @@ return (
 
 **Gets transformed to:**
 ```javascript
-import { jsx } from './frontend-core/jsx-compiler-new/jsx-runtime.js';
+import { jsx } from './core/jsx-compiler-new/jsx-runtime.js';
 
 return jsx('button', 
   { onclick: () => setCount(prev => prev + 1) },

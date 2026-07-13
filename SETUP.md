@@ -8,7 +8,7 @@ Use the `jsx()` function directly in your HTML files. No setup needed!
 
 **Example:**
 ```javascript
-import { jsx } from '../frontend-core/jsx-compiler-new/jsx-runtime.js';
+import { jsx } from '../core/jsx-compiler-new/jsx-runtime.js';
 
 return jsx('button', { onclick: () => setCount(prev => prev + 1) }, count());
 ```
@@ -53,13 +53,13 @@ Write actual JSX syntax like React. Requires Vite setup.
 ### File Structure:
 
 ```
-frontend-core/
-├── package.json          # Root package.json with Vite
-├── vite.config.js       # Vite configuration for JSX
-├── index.html           # Entry point (optional)
+/
+├── package.json
+├── vite.config.js
+├── index.js
+├── signals/
+├── core/
 └── signals-example/
-    ├── Counter.jsx      # JSX component (requires Vite)
-    └── *.html           # HTML examples (work without Vite)
 ```
 
 ## Quick Start Commands
