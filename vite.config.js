@@ -12,12 +12,14 @@ export default defineConfig({
   plugins: [
     fineGrainedJsx(),
     {
-      name: 'routing-example-spa',
+      name: 'spa-path-rewrites',
       configureServer(server) {
         server.middlewares.use((req, _res, next) => {
           const path = req.url?.split('?')[0] ?? '';
           if (path === '/routing' || path.startsWith('/routing/')) {
             req.url = '/signals-example/12-routing.html';
+          } else if (path === '/zenwayro' || path.startsWith('/zenwayro/')) {
+            req.url = '/apps/zenwayro/index.html';
           }
           next();
         });
@@ -31,6 +33,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, './'),
+      '@app': resolve(__dirname, './apps/zenwayro/src'),
       './core/jsx-compiler-new/jsx-dev-runtime': resolve(
         jsxRuntimePath,
         './jsx-dev-runtime.js'
@@ -48,6 +51,9 @@ export default defineConfig({
         './jsx-runtime.js'
       ),
     },
+  },
+  css: {
+    postcss: './postcss.config.js',
   },
   server: {
     port: 3000,
