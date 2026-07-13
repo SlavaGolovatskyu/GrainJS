@@ -1,0 +1,83 @@
+---
+description: Directory structure, naming, placement, and narrow context boundaries
+globs: src/**/*.ts,src/**/*.tsx
+alwaysApply: false
+---
+
+# File and directory placement
+
+## Component directory
+
+```
+ComponentName/
+  atoms/
+  molecules/                  ← each child has its own hook
+  hooks/                      ← focused hooks (one per directory)
+  utils/
+  ComponentName.component.tsx
+  useComponentName.hook.ts
+  ComponentName.context.tsx   ← sibling coordination only (see Context rule)
+  ComponentName.types.ts
+  ComponentName.constants.ts
+  index.ts
+```
+
+## Feature page with multiple sections
+
+When a page has map + header + sheet + overlay (or similar), **do not** use one `usePageContent.hook.ts` at the root. Instead:
+
+```
+FeaturePageContent/
+  FeaturePageContent.component.tsx
+  FeaturePageContentV2.context.tsx       ← Provider + narrow context
+  hooks/
+    useFeaturePageContentV2State/      ← coordination state for Provider
+    useFeaturePageContentV2Context/    ← consumer hook
+    useFeaturePageContentV2Mount/      ← mount ref only (optional)
+  molecules/
+    FeatureV2MapLayer/
+      FeatureV2MapLayer.component.tsx
+      useFeatureV2MapLayer.hook.ts
+    FeatureV2BottomSheet/
+      ...
+```
+
+## Standalone hook directory
+
+```
+useSomething/
+  useSomething.hook.ts
+  useSomething.types.ts
+  useSomething.constants.ts
+  index.ts
+```
+
+## Utility placement
+- Cross-feature → `src/utils/<name>/`
+- Feature-specific → `<Feature>/utils/<name>/`
+- One util per directory; never duplicate a global util locally.
+
+## Types and constants
+- Types → `.types.ts`. Constants → `.constants.ts`. No magic numbers in logic files.
+- Closed string sets (statuses, filters, modes): define `FOO_STATUSES` + `FOO_STATUS` once, derive the type, and reuse in switches/UI/API — see root `status-and-enum-constants.mdc`.
+
+
+## Exports, naming, tests
+- Export through `index.ts`. Exact suffixes: `.component.tsx`, `.hook.ts`, `.util.ts`, `.types.ts`, `.constants.ts`, `.context.tsx`.
+- Create a matching test when you create a hook, util, or component.
+
+## Context rule
+
+Create `ComponentName.context.tsx` when siblings need shared state — **not** as a dump for all feature logic.
+
+**Context value should contain:**
+- Refs/handlers shared between siblings (sheet ref, `openSheet`, viewport, coordination callbacks)
+- Mode flags siblings need (`showCityPicker`)
+
+**Context value must NOT contain:**
+- All derived UI for every child (`mapPlaces`, `filteredCities`, `selectedPlace`, loading overlays, i18n `t`)
+- Everything a god hook would have returned
+
+If removing one molecule would force editing a 100+ line state hook, the boundaries are wrong — move derived data into that molecule's hook.
+
+See `feature-composition.mdc` and `hook-files.mdc`.

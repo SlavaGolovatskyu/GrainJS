@@ -2,11 +2,7 @@ export {
   createSignal, 
   createEffect, 
   createMemo,
-  onCleanup,
-  currentEffect,
-  currentComponent,
-  setCurrentEffect,
-  setCurrentComponent
+  onCleanup
 } from './signals-core/index.js';
 
 export { 
@@ -17,4 +13,3 @@ export {
   render,
   Fragment
 } from './frontend-core/index.js';
-

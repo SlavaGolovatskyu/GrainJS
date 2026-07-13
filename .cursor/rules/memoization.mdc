@@ -1,0 +1,119 @@
+---
+description: When to use useMemo, useCallback, and React.memo — default is do not memoize
+globs: **/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Memoization (`useMemo`, `useCallback`, `memo`)
+
+**Default: do not memoize.** Prefer plain values, inline functions, and normal derived expressions. Only add memoization when there is a concrete reason (measured cost, referential stability required by an API, or a child that is expensive *and* memoized).
+
+Do not wrap things “just in case.” Memoization has cost (dependency tracking, extra allocations) and often changes nothing.
+
+## Never memoize these
+
+```ts
+// ❌ BAD — primitives and cheap expressions
+const isMine = useMemo(() => scope === 'mine', [scope]);
+const isVisible = useMemo(() => !isLoading && !error, [isLoading, error]);
+const label = useMemo(() => t('trips.title'), [t]);
+const count = useMemo(() => items.length, [items]);
+
+// ✅ GOOD — compute inline
+const isMine = scope === 'mine';
+const isVisible = !isLoading && !error;
+const label = t('trips.title');
+const count = items.length;
+```
+
+Also avoid:
+
+- `useCallback` for a handler passed only to a native element (`<button onClick={…}>`) or a non-memoized child
+- `useMemo` for object/array literals that are only used in the same render and not passed to memoized children or effect deps
+- `React.memo` on every component “for performance”
+- Memoizing return values of a hook solely so the return object “looks stable” when callers do not depend on referential equality
+
+```ts
+// ❌ BAD — handler only used on a button in this component
+const onClick = useCallback(() => setOpen(true), []);
+
+// ✅ GOOD
+const onClick = () => setOpen(true);
+// or inline: <button onClick={() => setOpen(true)}>
+```
+
+## When `useMemo` is appropriate
+
+Use only when **all** of the following hold:
+
+1. The computation is **noticeably expensive** (large lists, heavy transforms, sorting/filtering big arrays, non-trivial derived structures), **or**
+2. You need a **stable reference** for a value used in `useEffect` / `useMemo` / `useCallback` dependency arrays or as a prop to a **memoized** child, **and** recreating it every render would cause real extra work or loops
+
+```ts
+// ✅ GOOD — filter/map over a list used in render
+const filtered = useMemo(
+  () => trips.filter((trip) => matchesDashboardFilter(trip, activeFilter, today)),
+  [trips, activeFilter, today],
+);
+
+// ✅ GOOD — expensive pure transform
+const placesById = useMemo(() => indexPlacesById(places), [places]);
+```
+
+Cheap `.map` / `.filter` on small arrays (dozens of items) usually does **not** need `useMemo`.
+
+## When `useCallback` is appropriate
+
+Use only when the function identity must stay stable **and** that stability matters:
+
+- Passed to a child wrapped in `React.memo` / `memo` that compares props by reference
+- Passed into a dependency array of `useEffect`, `useMemo`, or another `useCallback`
+- Required by a library API that subscribes/compares by reference
+
+```ts
+// ✅ GOOD — stable handler shared via context or memoized child
+const handleScopeChange = useCallback(
+  (next: TripsScope) => {
+    setScope(next);
+    setPage(1);
+  },
+  [setPage],
+);
+```
+
+If the only consumer is this component’s JSX and nothing is memoized below, **skip** `useCallback`.
+
+## When `React.memo` / `memo` is appropriate
+
+Use only on components that:
+
+1. Re-render often because a **parent** re-renders frequently, **and**
+2. Are **expensive** to render (large subtrees, lists, maps, charts), **and**
+3. Often receive **unchanged** props
+
+Do not wrap leaf buttons, simple text rows, or layout shells by default.
+
+```tsx
+// ✅ GOOD — heavy list row / map layer with stable props
+export const HeavyMapLayer = memo(HeavyMapLayerComponent);
+```
+
+Prefer fixing unnecessary parent state updates over sprinkling `memo` everywhere.
+
+## Decision checklist
+
+Before adding `useMemo` / `useCallback` / `memo`, answer:
+
+1. Is this a **primitive or cheap** expression? → **No memo.**
+2. Is there a **memoized child** or **effect dep** that needs a stable reference? If not → **No memo.**
+3. Is the work **actually expensive** (large data / heavy CPU)? If not → **No memo.**
+4. Would skipping memo cause a **bug** (effect loop, subscription churn)? Only then memoize.
+
+If unsure, **leave it unmemoized.** Add memoization later when profiling or a real bug shows it is needed.
+
+## Self-check
+
+- [ ] No `useMemo` around booleans, numbers, strings, or trivial expressions
+- [ ] No `useCallback` solely for handlers on local DOM elements
+- [ ] No blanket `memo()` on new components without a parent-render cost reason
+- [ ] Existing memoization left in place only where referential stability or cost is justified

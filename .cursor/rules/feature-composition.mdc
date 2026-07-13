@@ -1,0 +1,93 @@
+---
+description: Feature/page composition — independent molecules, narrow context, no god hooks
+globs: src/app/**/*.tsx,src/app/**/*.hook.ts,src/app/**/*.context.tsx
+alwaysApply: false
+---
+
+# Feature / page composition
+
+A feature page is a **layout of independent molecules**, not one mega-hook feeding every child via props.
+
+## Correct shape
+
+```
+FeaturePage/
+  FeaturePage.component.tsx          ← Provider + layout children only
+  FeaturePage.context.tsx            ← page-wide shared state (if needed)
+  molecules/
+    FeatureMapSection/
+      FeatureMapSection.component.tsx
+      useFeatureMapSection.hook.ts   ← owns map-specific logic
+    FeatureBottomSheet/
+      FeatureBottomSheet.component.tsx
+      useFeatureBottomSheet.hook.ts
+  FeaturePageContent/
+    FeaturePageContent.component.tsx ← thin layout shell
+    FeaturePageContentV2.context.tsx ← sibling coordination (if needed)
+    hooks/
+      useFeaturePageContentV2State/  ← runs in Provider; coordination state only
+      useFeaturePageContentV2Context/
+    molecules/
+      FeatureV2MapLayer/ + useFeatureV2MapLayer
+      FeatureV2Header/   + useFeatureV2Header
+      FeatureV2BottomSheet/ + useFeatureV2BottomSheet
+```
+
+```tsx
+// ✅ GOOD — page content is a layout shell; each child owns its hook
+export const FeaturePageContentV2 = () => {
+  const { mountContainerRef } = useFeaturePageContentV2Mount();
+  return (
+    <FeaturePageContentV2Provider>
+      <div ref={mountContainerRef}>
+        <FeatureV2MapLayer />
+        <FeatureV2Header />
+        <FeatureV2BottomSheet />
+        <FeatureV2PlaceOverlay />
+      </div>
+    </FeaturePageContentV2Provider>
+  );
+};
+```
+
+## Forbidden patterns
+
+```tsx
+// ❌ BAD — god hook: one hook returns everything; parent prop-drills to children
+export const FeaturePageContentV2 = () => {
+  const { mapCenter, mapZoom, sheetRef, openSheet, filteredCities, selectedPlace, ... } =
+    useFeaturePageContentV2(); // 20+ return keys
+  return (
+    <>
+      <MapLayer center={mapCenter} zoom={mapZoom} ... />
+      <Header onFocus={openSheet} ... />
+      <BottomSheet sheetRef={sheetRef} cities={filteredCities} ... />
+    </>
+  );
+};
+```
+
+```ts
+// ❌ BAD — god hook file: unrelated concerns in one return type
+export const useFeaturePageContentV2 = () => ({
+  mapCenter, mapZoom, mapPlaces, sheetRef, openSheet, filteredCities,
+  selectedPlace, searchValue, handleCityPick, showExploreFab, t, ...
+});
+```
+
+## Where logic lives
+
+| Concern | Owner |
+|---|---|
+| Sibling coordination (sheet ref, shared viewport, pick handlers) | `useFeatureState` inside Provider → context |
+| Derived UI for one section (map markers, filtered list, overlay place) | That section's `useFeatureSection` hook |
+| Pure transforms | `.util.ts` next to the hook that calls it |
+| Page-wide state (selected city, auth gates) | Existing page context — do not duplicate in a god hook |
+
+## Self-check before finishing a feature refactor
+
+- [ ] No hook returns more than **10 keys** (if more → split or move derived data to consumer hooks)
+- [ ] No parent component destructures **10+ values** from one hook to pass as props
+- [ ] Every molecule under `molecules/` has its own `useMoleculeName.hook.ts`
+- [ ] Feature/V2 context holds **coordination state only**, not all derived UI for every child
+- [ ] Deleting one molecule does not require editing a 200-line god hook

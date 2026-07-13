@@ -1,83 +1,89 @@
-import { setCurrentEffect, currentComponent } from '../reactive-context/reactive-context.js';
+import { pushEffect, popEffect, currentComponent } from '../reactive-context/reactive-context.js';
+
+function clearDeps(effect) {
+  if (effect._deps) {
+    effect._deps.forEach((unsubscribe) => unsubscribe(effect));
+    effect._deps.clear();
+  }
+}
+
+function runCleanups(effect, cleanupFnRef) {
+  if (cleanupFnRef.current) {
+    try {
+      cleanupFnRef.current();
+    } catch (error) {
+      console.error('Error in effect cleanup:', error);
+    }
+    cleanupFnRef.current = null;
+  }
+
+  if (effect._cleanups) {
+    effect._cleanups.forEach((cleanup) => {
+      try {
+        cleanup();
+      } catch (error) {
+        console.error('Error in onCleanup callback:', error);
+      }
+    });
+    effect._cleanups = [];
+  }
+}
 
 export function createEffect(fn) {
-  let cleanupFn = null;
-  
+  const cleanupFnRef = { current: null };
+
   const effect = () => {
-    // Run previous cleanup before re-running effect
-    if (cleanupFn) {
-      try {
-        cleanupFn();
-      } catch (error) {
-        console.error('Error in effect cleanup:', error);
-      }
-      cleanupFn = null;
+    if (effect._disabled) {
+      return;
     }
-    
-    // Clear any onCleanup callbacks from previous run
-    if (effect._cleanups) {
-      effect._cleanups.forEach(cleanup => {
-        try {
-          cleanup();
-        } catch (error) {
-          console.error('Error in onCleanup callback:', error);
-        }
-      });
-      effect._cleanups = [];
+
+    // Drop stale subscriptions before re-tracking
+    clearDeps(effect);
+    runCleanups(effect, cleanupFnRef);
+
+    if (!effect._deps) {
+      effect._deps = new Set();
     }
-    
-    setCurrentEffect(effect);
-    const result = fn();
-    setCurrentEffect(null);
-    
-    // If the effect returns a cleanup function, store it
+
+    const previous = pushEffect(effect);
+    let result;
+    try {
+      result = fn();
+    } finally {
+      popEffect(previous);
+    }
+
     if (typeof result === 'function') {
-      cleanupFn = result;
+      cleanupFnRef.current = result;
     }
   };
 
-  // Register cleanup with current component
-  // Only create effect if effects haven't been initialized yet (first render only)
+  effect._cleanups = [];
+  effect._deps = new Set();
+  effect._disabled = false;
+
+  const dispose = () => {
+    if (effect._disabled) {
+      return;
+    }
+    clearDeps(effect);
+    runCleanups(effect, cleanupFnRef);
+    effect._disabled = true;
+  };
+
+  effect._dispose = dispose;
+
+  // Only create effect on first render when inside a component
   if (currentComponent) {
     if (!currentComponent._effectsInitialized) {
-      // First render - allow effect creation
       currentComponent._effects.push(effect);
       effect();
     } else {
-      // Subsequent renders - effects already exist, don't create new ones
-      // Just return a no-op cleanup function
       return () => {};
     }
   } else {
-    // Not in component context - create effect normally
     effect();
   }
-  
-  // Return cleanup function
-  return () => {
-    // Run cleanup function
-    if (cleanupFn) {
-      try {
-        cleanupFn();
-      } catch (error) {
-        console.error('Error in effect cleanup:', error);
-      }
-      cleanupFn = null;
-    }
-    
-    // Run all onCleanup callbacks
-    if (effect._cleanups) {
-      effect._cleanups.forEach(cleanup => {
-        try {
-          cleanup();
-        } catch (error) {
-          console.error('Error in onCleanup callback:', error);
-        }
-      });
-      effect._cleanups = [];
-    }
-    
-    // Disable the effect
-    effect._disabled = true;
-  };
+
+  return dispose;
 }

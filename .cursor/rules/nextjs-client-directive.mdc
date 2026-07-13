@@ -1,0 +1,10 @@
+---
+description: Next.js 'use client' directive rules for the web frontend
+alwaysApply: true
+---
+
+# 'use client' directive
+
+- `'use client'` is allowed only in `.component.tsx` / `.context.tsx` files that actually need state, effects, event handlers, or browser APIs.
+- Never add it to `.hook.ts`, `.util.ts`, `.types.ts`, or `.constants.ts` files.
+- Prefer server components when no interactivity is needed.

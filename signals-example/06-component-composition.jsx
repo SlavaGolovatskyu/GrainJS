@@ -1,11 +1,12 @@
-import { createSignal, createComponent, render } from '../index.js';
+import { createSignal, createEffect, createComponent, render } from '../index.js';
 
 // Button Component
 export const Button = createComponent((props) => {
+  const handleClick = props.onClick || props.onclick || (() => {});
   return (
     <button 
       style={`background: ${props.color || '#007bff'};`}
-      onclick={props.onClick || (() => {})}
+      onclick={handleClick}
     >
       {props.label || 'Click me'}
     </button>
@@ -42,15 +43,17 @@ export const Counter = createComponent((props) => {
 export const Timer = createComponent(() => {
   const [seconds, setSeconds] = createSignal(0);
   const [isRunning, setIsRunning] = createSignal(false);
-  
-  let intervalId = null;
-  
-  if (isRunning()) {
-    intervalId = setInterval(() => {
-      setSeconds(s => s + 1);
+
+  createEffect(() => {
+    if (!isRunning()) return;
+
+    const intervalId = setInterval(() => {
+      setSeconds((s) => s + 1);
     }, 1000);
-  }
-  
+
+    return () => clearInterval(intervalId);
+  });
+
   return (
     <div>
       <p style="font-size: 32px; font-weight: bold; color: #28a745;">

@@ -1,0 +1,53 @@
+---
+description: Contract for .hook.ts files — one responsibility per hook, no god hooks
+globs: **/*.hook.ts
+alwaysApply: false
+---
+
+# .hook.ts contract
+
+- One hook per file, one responsibility per hook. `useCityPickerCamera` handles the camera — not sheets, not auth, not search.
+- No JSX in hooks.
+- Param and result types live in `useSomething.types.ts`. Constants live in `useSomething.constants.ts`. No magic numbers in the hook body.
+- Pure computations → `.util.ts`; the hook imports and calls the util.
+- Return a named object type, not a tuple (except React idioms like `[value, setValue]`).
+- Never add `'use client'` to hook files.
+
+## No god hooks
+
+A hook must not become the single brain for an entire page or feature tree.
+
+**Hard limits:**
+- A component-level `useComponentName` hook returns **at most ~10 keys**. More → split into focused hooks or move derived data to the consumer that needs it.
+- Never create `useFeaturePageContent`, `usePageContentV2`, or similar hooks that bundle map + sheet + header + overlay + search + i18n in one return object.
+- A Provider's `useFeatureState` hook holds **sibling coordination only** (refs, shared viewport, handlers that cross sections). It does not compute `mapPlaces`, `filteredCities`, `selectedPlace`, loading flags, etc. for children — those belong in each child's hook.
+
+```ts
+// ❌ BAD — god hook
+export const useExplorePageContentV2 = () => ({
+  mapCenter, mapZoom, mapPlaces, sheetRef, openSheet, filteredCities,
+  selectedPlace, searchValue, handleCityPick, showExploreFab, t, ...
+});
+
+// ✅ GOOD — coordination state in Provider hook (context)
+export const useExplorePageContentV2State = () => ({
+  showCityPicker, sheetRef, openSheet, viewport, handleCityPick, ...
+});
+
+// ✅ GOOD — map section owns its derived data
+export const useExploreV2MapLayer = () => {
+  const { viewport, showCityPicker, ... } = useExplorePageContentV2Context();
+  const coveredCities = useDebouncedCoveredCities(viewport, showCityPicker);
+  const mapPlaces = useMemo(() => ..., [showCityPicker, coveredCities]);
+  return { center, zoom, places: mapPlaces, ... }; // ≤10 keys, map-only
+};
+```
+
+A component-level `useComponentName` may **call** several focused hooks and merge their results, but only for **that component's** concerns — not for sibling components it renders.
+
+## Memoization
+
+Default is **no** `useMemo` / `useCallback`. Do not memoize booleans, labels, or other cheap values. See `memoization.mdc`.
+
+See also: `feature-composition.mdc`.
+

@@ -51,6 +51,12 @@ Effects and cleanup demonstration showing:
 - Returning cleanup functions from effects
 - Component-level cleanup
 
+### 10-nested-render-isolation.html
+Deep nesting + render isolation:
+- App → trunks → mids → leaves, plus NestedA→B→C→DeepLeaf
+- Per-component `renders` badges
+- Updating one leaf should not re-run ancestors or sibling branches
+
 ## Running the Examples
 
 1. Open any HTML file in a modern web browser

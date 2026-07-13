@@ -1,37 +1,36 @@
 import { currentComponent, currentEffect } from '../reactive-context/reactive-context.js';
 
 export function onCleanup(fn) {
-  if (!currentComponent) {
-    throw new Error('onCleanup must be called within a component');
-  }
-
-  // Capture context at registration time
   const effect = currentEffect;
   const component = currentComponent;
 
-  // If we're inside an effect, associate cleanup with that effect
+  if (!effect && !component) {
+    throw new Error('onCleanup must be called within an effect or a component');
+  }
+
   if (effect) {
     if (!effect._cleanups) {
       effect._cleanups = [];
     }
     effect._cleanups.push(fn);
-  } else {
-    // Otherwise, register as component-level cleanup
-    if (!component._cleanups) {
-      component._cleanups = [];
-    }
-    component._cleanups.push(fn);
+
+    return () => {
+      const index = effect._cleanups.indexOf(fn);
+      if (index > -1) {
+        effect._cleanups.splice(index, 1);
+      }
+    };
   }
 
-  // Return the cleanup function for manual removal if needed
+  if (!component._cleanups) {
+    component._cleanups = [];
+  }
+  component._cleanups.push(fn);
+
   return () => {
-    const cleanups = effect?._cleanups || component._cleanups;
-    if (cleanups) {
-      const index = cleanups.indexOf(fn);
-      if (index > -1) {
-        cleanups.splice(index, 1);
-      }
+    const index = component._cleanups.indexOf(fn);
+    if (index > -1) {
+      component._cleanups.splice(index, 1);
     }
   };
 }
-

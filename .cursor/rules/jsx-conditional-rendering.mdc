@@ -1,0 +1,55 @@
+---
+description: Prefer && for optional JSX; never condition ? jsx : null
+globs: **/*.tsx
+alwaysApply: false
+---
+
+# JSX conditional rendering
+
+When rendering optional UI (show this or nothing), use `&&`. Do **not** use a ternary that ends in `null` or `undefined`.
+
+```tsx
+// ❌ BAD
+{isMine ? (
+  <Link href={actionHref}>
+    <Button variant="primary">{actionLabel}</Button>
+  </Link>
+) : null}
+
+{notes ? <p>{notes}</p> : null}
+
+// ✅ GOOD
+{isMine && (
+  <Link href={actionHref}>
+    <Button variant="primary">{actionLabel}</Button>
+  </Link>
+)}
+
+{notes && <p>{notes}</p>}
+```
+
+## When a ternary is OK
+
+Use `? :` only when choosing **between two real UI branches** (both sides render elements):
+
+```tsx
+// ✅ GOOD — both branches are UI
+{isLoading ? <Spinner /> : <Content />}
+```
+
+## Guard against `0` / `''` pitfalls
+
+Do not write `{count && <Badge />}` when `count` can be `0` (React renders `0`). Prefer an explicit boolean:
+
+```tsx
+// ✅ GOOD
+{count > 0 && <Badge count={count} />}
+{items.length > 0 && <List items={items} />}
+{Boolean(label) && <span>{label}</span>}
+```
+
+## Self-check
+
+- [ ] No `? (…jsx…) : null` or `? (…jsx…) : undefined`
+- [ ] Optional blocks use `condition && (…)`
+- [ ] Numeric/string conditions are explicit booleans when `0` / `''` would be wrong to render

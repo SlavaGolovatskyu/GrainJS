@@ -1,0 +1,104 @@
+---
+description: Contract for .component.tsx files — presentational only, one hook per component
+globs: **/*.component.tsx
+alwaysApply: false
+---
+
+# .component.tsx contract
+
+A component file may contain ONLY:
+1. Imports
+2. One arrow-function component
+3. Destructuring of props and of **one** call to its own `useComponentName` hook (or a single context consumer hook)
+4. JSX
+
+Anything else must be moved:
+
+| Found in a component file | Move it to |
+|---|---|
+| `useState`, `useEffect`, `useRef`, `useCallback`, `useMemo`, `useReducer` | `useComponentName.hook.ts` |
+| `type` declarations | `ComponentName.types.ts` |
+| Top-level non-component `const` values | `ComponentName.constants.ts` |
+| Pure functions (no JSX) | `./utils/<name>/<name>.util.ts` |
+| JSX in a variable, or conditional JSX > ~5 lines | `./atoms/` or `./molecules/` child component |
+
+Size limit: **150 lines** max. Decompose before finishing.
+
+## One hook per component — not one hook for the whole tree
+
+`useComponentName` serves **this component only**. It does not exist to gather all state for children.
+
+```tsx
+// ❌ BAD — parent gathers everything; children are prop pipes
+export const PageContentV2 = () => {
+  const { mapCenter, sheetRef, cities, openSheet, selectedPlace, ...20 more } = usePageContentV2();
+  return (
+    <>
+      <MapLayer center={mapCenter} ... />
+      <Header onFocus={openSheet} ... />
+      <BottomSheet sheetRef={sheetRef} cities={cities} ... />
+    </>
+  );
+};
+
+// ✅ GOOD — parent is layout; each child calls its own hook
+export const PageContentV2 = () => {
+  const { mountContainerRef } = usePageContentV2Mount();
+  return (
+    <PageContentV2Provider>
+      <div ref={mountContainerRef}>
+        <V2MapLayer />
+        <V2Header />
+        <V2BottomSheet />
+        <V2PlaceOverlay />
+      </div>
+    </PageContentV2Provider>
+  );
+};
+
+// ✅ GOOD — child owns its logic
+export const V2MapLayer = () => {
+  const { center, zoom, places, onPlaceClick, ... } = useV2MapLayer();
+  return <MapView center={center} zoom={zoom} places={places} onPlaceClick={onPlaceClick} />;
+};
+```
+
+**Red flags:** destructuring **10+ values** from one hook; passing **5+ props** that are really "business logic" into a child that has no hook of its own.
+
+## Leaf example
+
+```tsx
+// ✅ GOOD — CityList.component.tsx
+export const CityList = ({ cities }: CityListProps) => {
+  const { filteredCities, query, onQueryChange } = useCityList({ cities });
+  return <div>{/* JSX only */}</div>;
+};
+```
+
+## Memoization
+
+Do not add `useMemo`, `useCallback`, or `memo` by default (especially not for booleans or other cheap values). See `memoization.mdc`. Logic that needs memoization belongs in the co-located hook, not the component file.
+
+## Conditional JSX
+
+Optional UI uses `&&`, never `? … : null`. See `jsx-conditional-rendering.mdc`.
+
+
+```tsx
+// ❌ BAD
+{isMine ? <Button /> : null}
+
+// ✅ GOOD
+{isMine && <Button />}
+```
+
+## Self-check before finishing
+
+- [ ] No React state/effect/memo hooks imported
+- [ ] No inline `type`s, utils, or magic numbers
+- [ ] Under 150 lines
+- [ ] Data/handlers from **this** component's hook (or context), not a parent's god hook passed as props
+- [ ] Feature page roots are layout shells — see `feature-composition.mdc`
+- [ ] Optional JSX uses `&&`, not `? … : null`
+- [ ] No unnecessary `useMemo` / `useCallback` / `memo` (see `memoization.mdc`)
+

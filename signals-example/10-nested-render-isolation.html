@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nested Render Isolation</title>
+  <style>
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 20px;
+      background:
+        radial-gradient(ellipse at top left, #e8f0e6 0%, transparent 50%),
+        radial-gradient(ellipse at bottom right, #dce6ef 0%, transparent 45%),
+        #f3efe6;
+      color: #1c2420;
+    }
+    .container {
+      background: rgba(255, 252, 246, 0.92);
+      padding: 28px 32px;
+      border-radius: 4px;
+      border: 1px solid #cfc6b6;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 1.75rem;
+      letter-spacing: -0.02em;
+    }
+    .subtitle {
+      margin: 0 0 20px;
+      color: #4a564e;
+      line-height: 1.45;
+    }
+    .app {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .app-head {
+      padding-bottom: 8px;
+      border-bottom: 1px solid #d5cdc0;
+    }
+    .legend {
+      margin: 0;
+      font-size: 0.95rem;
+      color: #3d4a42;
+      line-height: 1.5;
+    }
+    .legend code {
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 0.9em;
+      background: #efe8da;
+      padding: 0 4px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .deep-column {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .node {
+      border: 1px solid #b7c2b4;
+      background: #f7faf5;
+      padding: 10px 12px;
+      margin-top: 8px;
+      border-radius: 2px;
+    }
+    .node.trunk.left {
+      border-color: #6a9b7a;
+      background: #eef6f0;
+    }
+    .node.trunk.right {
+      border-color: #6a89a8;
+      background: #eef3f8;
+    }
+    .node.leaf {
+      border-color: #c49a5a;
+      background: #fff8ee;
+    }
+    .node.static {
+      border-color: #9a9590;
+      background: #f0eee9;
+    }
+    .node-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .badge {
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 0.78rem;
+      background: #1c2420;
+      color: #f3efe6;
+      padding: 3px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .value {
+      font-size: 1.75rem;
+      font-weight: bold;
+      color: #2f5d44;
+      margin: 6px 0 10px;
+    }
+    .hint {
+      margin: 0;
+      font-size: 0.85rem;
+      color: #5a635c;
+    }
+    button {
+      font: inherit;
+      padding: 8px 12px;
+      cursor: pointer;
+      border: 1px solid #2f5d44;
+      background: #2f5d44;
+      color: #f3efe6;
+      border-radius: 2px;
+    }
+    button:hover {
+      background: #234833;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Nested Render Isolation</h1>
+    <p class="subtitle">
+      Deep custom-component tree. Each node shows how many times its render function ran.
+      Updating a leaf should only bump that leaf — not App, trunks, siblings, or StaticPanel.
+    </p>
+    <div id="app"></div>
+  </div>
+
+  <script type="module" src="./10-nested-render-isolation.jsx"></script>
+</body>
+</html>
