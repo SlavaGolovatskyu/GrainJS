@@ -1,8 +1,4 @@
-import {
-  createComponent,
-  createEffect,
-  onCleanup,
-} from '../../../../index.js';
+import { createEffect, onCleanup } from 'grain';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { getMapStyleUrl } from '../api/client.js';
@@ -11,7 +7,7 @@ import { cn } from '../design-system/utils/cn.js';
 
 let mapUid = 0;
 
-export const MapView = createComponent(function MapView(props) {
+export function MapView(props) {
   const id = `zw-map-${++mapUid}`;
   const center = props.center || EUROPE_MAP_CENTER;
   const zoom = props.zoom ?? EUROPE_MAP_ZOOM;
@@ -96,4 +92,4 @@ export const MapView = createComponent(function MapView(props) {
       )}
     />
   );
-});
+}

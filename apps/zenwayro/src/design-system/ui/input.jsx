@@ -1,7 +1,7 @@
-import { createComponent } from '../../../../../index.js';
+
 import { cn } from '../utils/cn.js';
 
-export const Input = createComponent(function Input(props) {
+export function Input(props) {
   const { class: className, className: classNameAlt, ...rest } = props;
   return (
     <input
@@ -12,4 +12,4 @@ export const Input = createComponent(function Input(props) {
       {...rest}
     />
   );
-});
+}

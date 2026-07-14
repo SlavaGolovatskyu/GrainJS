@@ -1,7 +1,7 @@
-import { createComponent } from '../../../../../index.js';
+
 import { cn } from '../utils/cn.js';
 
-export const Card = createComponent(function Card(props) {
+export function Card(props) {
   const outlet = props.children;
   return (
     <div
@@ -13,18 +13,18 @@ export const Card = createComponent(function Card(props) {
       {outlet}
     </div>
   );
-});
+}
 
-export const CardHeader = createComponent(function CardHeader(props) {
+export function CardHeader(props) {
   const outlet = props.children;
   return (
     <div class={cn('flex flex-col space-y-1.5 p-6', props.class || props.className)}>
       {outlet}
     </div>
   );
-});
+}
 
-export const CardTitle = createComponent(function CardTitle(props) {
+export function CardTitle(props) {
   const text = props.children;
   return (
     <h3
@@ -36,11 +36,11 @@ export const CardTitle = createComponent(function CardTitle(props) {
       {text}
     </h3>
   );
-});
+}
 
-export const CardContent = createComponent(function CardContent(props) {
+export function CardContent(props) {
   const outlet = props.children;
   return (
     <div class={cn('p-6 pt-0', props.class || props.className)}>{outlet}</div>
   );
-});
+}

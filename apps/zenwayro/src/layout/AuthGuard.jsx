@@ -1,9 +1,4 @@
-import {
-  createComponent,
-  createEffect,
-  navigate,
-  useLocation,
-} from '../../../../index.js';
+import { createEffect, navigate, useLocation } from 'grain';
 import { isAuthenticated } from '../api/client.js';
 import { isPublicPathname, routeAuthSignInWithCallback } from '../constants/routes.js';
 
@@ -16,7 +11,7 @@ function appPath(pathname) {
   return pathname;
 }
 
-export const AuthGuard = createComponent(function AuthGuard() {
+export function AuthGuard() {
   const location = useLocation();
 
   createEffect(() => {
@@ -27,4 +22,4 @@ export const AuthGuard = createComponent(function AuthGuard() {
   });
 
   return null;
-});
+}

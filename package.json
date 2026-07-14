@@ -1,27 +1,22 @@
 {
-  "name": "frontend-core",
+  "name": "grain-monorepo",
+  "private": true,
   "version": "1.0.0",
   "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "ssr:demo": "npm run start -w ssr-demo",
+    "pack:lib": "npm pack -w grain"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",
     "@babel/plugin-syntax-jsx": "^7.29.7",
-    "@tailwindcss/postcss": "^4.3.2",
-    "postcss": "^8.5.19",
-    "tailwindcss": "^4.3.2",
-    "tailwindcss-animate": "^1.0.7",
     "vite": "^5.0.0"
-  },
-  "dependencies": {
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "date-fns": "^4.4.0",
-    "maplibre-gl": "^5.24.0",
-    "pmtiles": "^4.4.1",
-    "tailwind-merge": "^3.6.0"
   }
 }

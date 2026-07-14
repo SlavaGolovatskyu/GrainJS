@@ -36,4 +36,4 @@ Credentials login/register against the API. Google uses GIS + `POST /api/auth/sy
 
 ## Notes
 
-Radix shadcn primitives are framework `createComponent` clones with the same Tailwind/cva classes. Plan itinerary uses HTML5 drag-and-drop. Explore city search debounces to `/api/cities/search` with local covered-city fallback.
+UI primitives and pages are plain PascalCase functions (React-like); `createComponent` is optional. Plan itinerary uses HTML5 drag-and-drop. Explore city search debounces to `/api/cities/search` with local covered-city fallback.

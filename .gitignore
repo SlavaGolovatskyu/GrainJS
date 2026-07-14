@@ -1,6 +1,5 @@
+node_modules
 ./node_modules
 ./dist
 ./build
-./frontend-core/jsx-compiler-new/node_modules
-
-node_modules
+*.tgz

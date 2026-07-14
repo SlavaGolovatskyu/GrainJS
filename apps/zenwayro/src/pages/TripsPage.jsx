@@ -1,9 +1,4 @@
-import {
-  createComponent,
-  createSignal,
-  createEffect,
-  A,
-} from '../../../../index.js';
+import { createSignal, createEffect, Link } from 'grain';
 import { fetchTrips, isAuthenticated } from '../api/client.js';
 import { Button } from '../design-system/ui/button.jsx';
 import { t } from '../i18n/t.js';
@@ -14,7 +9,7 @@ import {
 } from '../constants/routes.js';
 import { IconChevronRight } from '../design-system/icons.jsx';
 
-export const TripsPage = createComponent(function TripsPage() {
+export function TripsPage() {
   const [trips, setTrips] = createSignal([]);
   const [loading, setLoading] = createSignal(false);
   const [error, setError] = createSignal('');
@@ -54,9 +49,9 @@ export const TripsPage = createComponent(function TripsPage() {
       <div class="px-5 py-10 text-center">
         <h1 class="mb-2 text-2xl font-bold">{t('trips.title')}</h1>
         <p class="mb-4 text-muted-foreground">{t('trips.signInPrompt')}</p>
-        <A href={ROUTE_AUTH_SIGNIN}>
+        <Link href={ROUTE_AUTH_SIGNIN}>
           <Button class="coral-gradient border-0 text-white">{t('nav.signIn')}</Button>
-        </A>
+        </Link>
       </div>
     );
   }
@@ -81,9 +76,9 @@ export const TripsPage = createComponent(function TripsPage() {
         <div class="rounded-2xl border border-dashed border-border p-8 text-center">
           <h2 class="text-lg font-bold">{t('trips.noTripsTitle')}</h2>
           <p class="mb-4 text-sm text-muted-foreground">{t('trips.noTripsSubtitle')}</p>
-          <A href={ROUTE_PLAN_NEW}>
+          <Link href={ROUTE_PLAN_NEW}>
             <Button class="coral-gradient border-0 text-white">{t('trips.emptyAction')}</Button>
-          </A>
+          </Link>
         </div>
       ) : null}
 
@@ -96,7 +91,7 @@ export const TripsPage = createComponent(function TripsPage() {
             `Trip ${trip.id}`;
           const city = trip.city || title;
           return (
-            <A
+            <Link
               href={routePlanById(trip.id)}
               class="flex items-center gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm"
             >
@@ -113,18 +108,18 @@ export const TripsPage = createComponent(function TripsPage() {
                 </p>
               </div>
               <IconChevronRight size={18} class="text-muted-foreground" />
-            </A>
+            </Link>
           );
         })}
       </div>
 
       <div class="mt-6">
-        <A href={ROUTE_PLAN_NEW}>
+        <Link href={ROUTE_PLAN_NEW}>
           <Button class="w-full rounded-2xl coral-gradient border-0 py-6 text-white">
             {t('trips.addNewTrip')}
           </Button>
-        </A>
+        </Link>
       </div>
     </div>
   );
-});
+}

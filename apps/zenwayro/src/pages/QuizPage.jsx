@@ -1,9 +1,4 @@
-import {
-  createComponent,
-  createSignal,
-  A,
-  navigate,
-} from '../../../../index.js';
+import { createSignal, Link, navigate } from 'grain';
 import { Button } from '../design-system/ui/button.jsx';
 import { completeQuiz, isAuthenticated } from '../api/client.js';
 import { t } from '../i18n/t.js';
@@ -18,7 +13,7 @@ import {
 import { ROUTE_AUTH_SIGNUP, ROUTE_EXPLORE, ROUTE_HOME } from '../constants/routes.js';
 import { cn } from '../design-system/utils/cn.js';
 
-export const QuizPage = createComponent(function QuizPage() {
+export function QuizPage() {
   const [step, setStep] = createSignal(0);
   const [interests, setInterests] = createSignal({});
   const [vibe, setVibe] = createSignal('');
@@ -220,8 +215,8 @@ export const QuizPage = createComponent(function QuizPage() {
         </Button>
       </div>
       <p class="mt-4 text-center text-sm text-muted-foreground">
-        <A href={ROUTE_HOME}>{t('nav.home')}</A>
+        <Link href={ROUTE_HOME}>{t('nav.home')}</Link>
       </p>
     </div>
   );
-});
+}

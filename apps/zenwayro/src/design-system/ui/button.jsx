@@ -1,5 +1,5 @@
 import { cva } from 'class-variance-authority';
-import { createComponent } from '../../../../../index.js';
+
 import { cn } from '../utils/cn.js';
 
 export const buttonVariants = cva(
@@ -31,7 +31,7 @@ export const buttonVariants = cva(
   }
 );
 
-export const Button = createComponent(function Button(props) {
+export function Button(props) {
   const {
     class: className,
     className: classNameAlt,
@@ -73,4 +73,4 @@ export const Button = createComponent(function Button(props) {
       {children}
     </button>
   );
-});
+}

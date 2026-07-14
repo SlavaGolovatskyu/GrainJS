@@ -1,4 +1,4 @@
-import { createComponent, A } from '../../../../index.js';
+import { Link } from 'grain';
 import { t } from '../i18n/t.js';
 import {
   ROUTE_CONTACT,
@@ -8,29 +8,29 @@ import {
   ROUTE_TERMS,
 } from '../constants/routes.js';
 
-const LegalLayout = createComponent(function LegalLayout(props) {
+function LegalLayout(props) {
   const outlet = props.children;
   return (
     <article class="mx-auto max-w-3xl px-4 py-8">
-      <A href={ROUTE_HOME} class="text-sm text-[#3b6fa0]">
+      <Link href={ROUTE_HOME} class="text-sm text-[#3b6fa0]">
         {t('nav.home')}
-      </A>
+      </Link>
       <h1 class="mt-3 mb-2 text-3xl font-bold text-foreground">{props.title}</h1>
       {props.subtitle ? (
         <p class="mb-6 text-muted-foreground">{props.subtitle}</p>
       ) : null}
       <div class="prose prose-sm max-w-none space-y-4 text-foreground">{outlet}</div>
       <nav class="mt-10 flex flex-wrap gap-4 border-t border-border pt-6 text-sm">
-        <A href={ROUTE_TERMS}>{t('footer.terms')}</A>
-        <A href={ROUTE_PRIVACY}>{t('footer.privacy')}</A>
-        <A href={ROUTE_COOKIES}>{t('footer.cookies')}</A>
-        <A href={ROUTE_CONTACT}>{t('footer.contact')}</A>
+        <Link href={ROUTE_TERMS}>{t('footer.terms')}</Link>
+        <Link href={ROUTE_PRIVACY}>{t('footer.privacy')}</Link>
+        <Link href={ROUTE_COOKIES}>{t('footer.cookies')}</Link>
+        <Link href={ROUTE_CONTACT}>{t('footer.contact')}</Link>
       </nav>
     </article>
   );
-});
+}
 
-export const TermsPage = createComponent(function TermsPage() {
+export function TermsPage() {
   return (
     <LegalLayout title={t('footer.terms')}>
       <section>
@@ -56,9 +56,9 @@ export const TermsPage = createComponent(function TermsPage() {
       </section>
     </LegalLayout>
   );
-});
+}
 
-export const PrivacyPage = createComponent(function PrivacyPage() {
+export function PrivacyPage() {
   return (
     <LegalLayout title={t('footer.privacy')}>
       <section>
@@ -83,9 +83,9 @@ export const PrivacyPage = createComponent(function PrivacyPage() {
       </section>
     </LegalLayout>
   );
-});
+}
 
-export const CookiesPage = createComponent(function CookiesPage() {
+export function CookiesPage() {
   return (
     <LegalLayout title={t('footer.cookies')}>
       <section>
@@ -103,9 +103,9 @@ export const CookiesPage = createComponent(function CookiesPage() {
       </section>
     </LegalLayout>
   );
-});
+}
 
-export const ContactPage = createComponent(function ContactPage() {
+export function ContactPage() {
   return (
     <LegalLayout title={t('contact.heroTitle')} subtitle={t('contact.heroSubtitle')}>
       <section class="rounded-2xl border border-border bg-card p-5">
@@ -133,4 +133,4 @@ export const ContactPage = createComponent(function ContactPage() {
       </section>
     </LegalLayout>
   );
-});
+}

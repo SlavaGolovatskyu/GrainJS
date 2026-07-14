@@ -1,11 +1,4 @@
-import {
-  createComponent,
-  createSignal,
-  createEffect,
-  useParams,
-  A,
-  navigate,
-} from '../../../../index.js';
+import { createSignal, createEffect, useParams, Link, navigate } from 'grain';
 import { MapView } from '../components/MapView.jsx';
 import { Button } from '../design-system/ui/button.jsx';
 import { Input } from '../design-system/ui/input.jsx';
@@ -41,7 +34,7 @@ function createDemoItinerary(cityName) {
   };
 }
 
-export const PlanPage = createComponent(function PlanPage() {
+export function PlanPage() {
   const params = useParams();
   const id = params().id || 'new';
   const search = new URLSearchParams(
@@ -99,9 +92,9 @@ export const PlanPage = createComponent(function PlanPage() {
           >
             {t('explore.generateTrip')}
           </Button>
-          <A href={ROUTE_EXPLORE}>
+          <Link href={ROUTE_EXPLORE}>
             <Button variant="outline">{t('nav.explore')}</Button>
-          </A>
+          </Link>
         </div>
       </div>
     );
@@ -133,9 +126,9 @@ export const PlanPage = createComponent(function PlanPage() {
       <div class="flex w-full shrink-0 flex-col border-b border-border bg-card lg:w-[28rem] lg:border-b-0 lg:border-r">
         <div class="flex items-center justify-between border-b border-border px-4 py-3">
           <div>
-            <A href={ROUTE_TRIPS} class="text-xs text-[#3b6fa0]">
+            <Link href={ROUTE_TRIPS} class="text-xs text-[#3b6fa0]">
               {t('nav.allTrips')}
-            </A>
+            </Link>
             <h1 class="text-lg font-bold">{trip.city}</h1>
             <p class="text-xs text-muted-foreground">Plan · {id}</p>
           </div>
@@ -205,18 +198,18 @@ export const PlanPage = createComponent(function PlanPage() {
       </div>
     </div>
   );
-});
+}
 
-export const SharedPlanPage = createComponent(function SharedPlanPage() {
+export function SharedPlanPage() {
   const params = useParams();
   const slug = params().slug || params().id || 'shared';
   return (
     <div class="px-4 py-8">
       <h1 class="text-2xl font-bold">Shared plan</h1>
       <p class="text-muted-foreground">{slug}</p>
-      <A href={routePlanById('demo')} class="mt-4 inline-block">
+      <Link href={routePlanById('demo')} class="mt-4 inline-block">
         <Button class="coral-gradient border-0 text-white">Open demo plan</Button>
-      </A>
+      </Link>
     </div>
   );
-});
+}

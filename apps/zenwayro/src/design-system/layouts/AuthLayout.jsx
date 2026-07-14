@@ -1,4 +1,4 @@
-import { createComponent, A } from '../../../../../index.js';
+import { Link } from 'grain';
 import { cn } from '../utils/cn.js';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card.jsx';
 import { t } from '../../i18n/t.js';
@@ -9,7 +9,7 @@ import {
   ROUTE_TERMS,
 } from '../../constants/routes.js';
 
-export const RouteV2Wrapper = createComponent(function RouteV2Wrapper(props) {
+export function RouteV2Wrapper(props) {
   const outlet = props.children;
   const width =
     props.width === 'narrow'
@@ -28,9 +28,9 @@ export const RouteV2Wrapper = createComponent(function RouteV2Wrapper(props) {
       {outlet}
     </div>
   );
-});
+}
 
-export const AuthPageLayout = createComponent(function AuthPageLayout(props) {
+export function AuthPageLayout(props) {
   const outlet = props.children;
   const title = props.title;
   const description = props.description;
@@ -50,9 +50,9 @@ export const AuthPageLayout = createComponent(function AuthPageLayout(props) {
       </Card>
     </RouteV2Wrapper>
   );
-});
+}
 
-export const AppFooter = createComponent(function AppFooter(props) {
+export function AppFooter(props) {
   const year = String(new Date().getFullYear());
   return (
     <footer
@@ -65,34 +65,34 @@ export const AppFooter = createComponent(function AppFooter(props) {
         aria-label={t('footer.legalNav')}
         class="mb-6 flex flex-wrap justify-center gap-x-6 gap-y-3"
       >
-        <A
+        <Link
           href={ROUTE_TERMS}
           class="text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           {t('footer.terms')}
-        </A>
-        <A
+        </Link>
+        <Link
           href={ROUTE_PRIVACY}
           class="text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           {t('footer.privacy')}
-        </A>
-        <A
+        </Link>
+        <Link
           href={ROUTE_COOKIES}
           class="text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           {t('footer.cookies')}
-        </A>
-        <A
+        </Link>
+        <Link
           href={ROUTE_CONTACT}
           class="text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           {t('footer.contact')}
-        </A>
+        </Link>
       </nav>
       <p class="text-xs text-muted-foreground">
         {t('footer.copyright', { year })}
       </p>
     </footer>
   );
-});
+}

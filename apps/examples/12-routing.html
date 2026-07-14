@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Routing Example</title>
+  <style>
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      max-width: 640px;
+      margin: 40px auto;
+      padding: 20px;
+      background: linear-gradient(160deg, #e8eef2, #f3ebe0);
+      color: #1c2428;
+    }
+    .wrap {
+      background: rgba(255, 252, 247, 0.95);
+      border: 1px solid #c8bfb2;
+      padding: 24px 28px;
+    }
+    h1 { margin: 0 0 6px; font-size: 1.6rem; }
+    .lede { margin: 0 0 20px; color: #556068; line-height: 1.4; }
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #ddd4c6;
+    }
+    .nav a {
+      color: #2c4a5e;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .nav a:hover { text-decoration: underline; }
+    .nav a.active {
+      color: #8a3b12;
+      border-bottom: 2px solid #8a3b12;
+    }
+    .page h2 { margin-top: 0; }
+    .meta {
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 0.85rem;
+      color: #556068;
+    }
+    button {
+      font: inherit;
+      padding: 8px 12px;
+      cursor: pointer;
+      border: 1px solid #2c4a5e;
+      background: #2c4a5e;
+      color: #f7f3eb;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Routing</h1>
+    <p class="lede">
+      Open via <code>/routing</code> (Vite rewrite). History API with
+      <code> basename="/routing"</code>. Use browser back/forward.
+    </p>
+    <div id="app"></div>
+  </div>
+  <script type="module" src="/apps/examples/12-routing.jsx"></script>
+</body>
+</html>

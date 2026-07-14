@@ -1,9 +1,4 @@
-import {
-  createComponent,
-  createSignal,
-  A,
-  navigate,
-} from '../../../../index.js';
+import { createSignal, Link, navigate } from 'grain';
 import {
   login,
   register,
@@ -27,7 +22,7 @@ import {
   ROUTE_TRIPS,
 } from '../constants/routes.js';
 
-export const AuthSignInPage = createComponent(function AuthSignInPage() {
+export function AuthSignInPage() {
   const [email, setEmail] = createSignal('');
   const [password, setPassword] = createSignal('');
   const [error, setError] = createSignal('');
@@ -102,12 +97,12 @@ export const AuthSignInPage = createComponent(function AuthSignInPage() {
             onInput={(e) => setPassword(e.target.value)}
           />
         </div>
-        <A
+        <Link
           href={ROUTE_AUTH_FORGOT_PASSWORD}
           class="text-sm font-medium text-indigo-600"
         >
           {t('auth.forgotPasswordLink')}
-        </A>
+        </Link>
         {error() ? <p class="text-sm text-destructive">{error()}</p> : null}
         <Button type="submit" size="lg" class="w-full" disabled={busy()}>
           {busy() ? t('auth.loading') : t('nav.signIn')}
@@ -115,15 +110,15 @@ export const AuthSignInPage = createComponent(function AuthSignInPage() {
       </form>
       <p class="mt-4 text-center text-sm text-muted-foreground">
         {t('auth.dontHaveAccount')}{' '}
-        <A href={ROUTE_AUTH_SIGNUP} class="font-medium text-foreground">
+        <Link href={ROUTE_AUTH_SIGNUP} class="font-medium text-foreground">
           {t('auth.signUpLink')}
-        </A>
+        </Link>
       </p>
     </AuthPageLayout>
   );
-});
+}
 
-export const AuthSignUpPage = createComponent(function AuthSignUpPage() {
+export function AuthSignUpPage() {
   const [name, setName] = createSignal('');
   const [email, setEmail] = createSignal('');
   const [password, setPassword] = createSignal('');
@@ -211,13 +206,13 @@ export const AuthSignUpPage = createComponent(function AuthSignUpPage() {
       </form>
       <p class="mt-4 text-center text-sm text-muted-foreground">
         {t('auth.alreadyHaveAccount')}{' '}
-        <A href={ROUTE_AUTH_SIGNIN}>{t('auth.signInLink')}</A>
+        <Link href={ROUTE_AUTH_SIGNIN}>{t('auth.signInLink')}</Link>
       </p>
     </AuthPageLayout>
   );
-});
+}
 
-export const AuthForgotPasswordPage = createComponent(function AuthForgotPasswordPage() {
+export function AuthForgotPasswordPage() {
   const [email, setEmail] = createSignal('');
   const [message, setMessage] = createSignal('');
   const [error, setError] = createSignal('');
@@ -256,15 +251,15 @@ export const AuthForgotPasswordPage = createComponent(function AuthForgotPasswor
         <Button type="submit" disabled={busy()}>
           {busy() ? t('auth.sending') : t('auth.sendResetLink')}
         </Button>
-        <A href={ROUTE_AUTH_SIGNIN} class="text-center text-sm">
+        <Link href={ROUTE_AUTH_SIGNIN} class="text-center text-sm">
           {t('auth.backToSignIn')}
-        </A>
+        </Link>
       </form>
     </AuthPageLayout>
   );
-});
+}
 
-export const AuthResetPasswordPage = createComponent(function AuthResetPasswordPage() {
+export function AuthResetPasswordPage() {
   const [password, setPassword] = createSignal('');
   const [error, setError] = createSignal('');
   const [busy, setBusy] = createSignal(false);
@@ -303,9 +298,9 @@ export const AuthResetPasswordPage = createComponent(function AuthResetPasswordP
       </form>
     </AuthPageLayout>
   );
-});
+}
 
-export const AuthVerifyPendingPage = createComponent(function AuthVerifyPendingPage() {
+export function AuthVerifyPendingPage() {
   const params = new URLSearchParams(window.location.search);
   const email = params.get('email') || '';
   return (
@@ -313,9 +308,9 @@ export const AuthVerifyPendingPage = createComponent(function AuthVerifyPendingP
       <p class="text-sm text-muted-foreground">
         {t('auth.verificationPendingMessage', { email })}
       </p>
-      <A href={ROUTE_AUTH_SIGNIN} class="mt-4 block text-center text-sm font-medium">
+      <Link href={ROUTE_AUTH_SIGNIN} class="mt-4 block text-center text-sm font-medium">
         {t('auth.backToSignIn')}
-      </A>
+      </Link>
     </AuthPageLayout>
   );
-});
+}

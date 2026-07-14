@@ -1,9 +1,4 @@
-import {
-  createComponent,
-  createSignal,
-  createEffect,
-  navigate,
-} from '../../../../index.js';
+import { createSignal, createEffect, navigate } from 'grain';
 import {
   fetchMe,
   isAuthenticated,
@@ -17,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../design-system/ui/ca
 import { t } from '../i18n/t.js';
 import { ROUTE_AUTH_SIGNIN, ROUTE_HOME } from '../constants/routes.js';
 
-export const SettingsPage = createComponent(function SettingsPage() {
+export function SettingsPage() {
   const token = useAuthToken();
   const [name, setName] = createSignal('');
   const [username, setUsername] = createSignal('');
@@ -142,4 +137,4 @@ export const SettingsPage = createComponent(function SettingsPage() {
       </div>
     </div>
   );
-});
+}

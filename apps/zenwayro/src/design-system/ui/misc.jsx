@@ -1,7 +1,7 @@
-import { createComponent } from '../../../../../index.js';
+
 import { cn } from '../utils/cn.js';
 
-export const Label = createComponent(function Label(props) {
+export function Label(props) {
   return (
     <label
       for={props.for || props.htmlFor}
@@ -13,9 +13,9 @@ export const Label = createComponent(function Label(props) {
       {props.children}
     </label>
   );
-});
+}
 
-export const Badge = createComponent(function Badge(props) {
+export function Badge(props) {
   return (
     <div
       class={cn(
@@ -26,9 +26,9 @@ export const Badge = createComponent(function Badge(props) {
       {props.children}
     </div>
   );
-});
+}
 
-export const Skeleton = createComponent(function Skeleton(props) {
+export function Skeleton(props) {
   return (
     <div
       class={cn(
@@ -37,13 +37,13 @@ export const Skeleton = createComponent(function Skeleton(props) {
       )}
     />
   );
-});
+}
 
-export const Separator = createComponent(function Separator(props) {
+export function Separator(props) {
   return (
     <div
       role="separator"
       class={cn('shrink-0 bg-border h-[1px] w-full', props.class || props.className)}
     />
   );
-});
+}

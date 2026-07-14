@@ -1,4 +1,4 @@
-import { createSignal, createEffect, onCleanup } from '../../../../index.js';
+import { createSignal, createEffect, onCleanup } from 'grain';
 
 /**
  * Tiny query helper — replaces common TanStack Query read patterns.

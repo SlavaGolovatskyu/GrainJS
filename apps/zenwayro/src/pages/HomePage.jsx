@@ -1,4 +1,4 @@
-import { createComponent, A } from '../../../../index.js';
+import { Link } from 'grain';
 import { Button } from '../design-system/ui/button.jsx';
 import {
   IconArrowRight,
@@ -31,7 +31,7 @@ const SAMPLE_POPULAR = [
   { id: 'rome', city: 'rome', durationDays: 4, cityImageCdnUrl: '' },
 ];
 
-export const HomePage = createComponent(function HomePage() {
+export function HomePage() {
   const token = useAuthToken();
   const authed = Boolean(token());
   const isPlanMode = authed || isAuthenticated();
@@ -59,12 +59,12 @@ export const HomePage = createComponent(function HomePage() {
             <div class="coral-gradient flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
               <IconMap size={16} class="text-white" />
             </div>
-            <A
+            <Link
               href={ROUTE_HOME}
               class="text-xl font-bold tracking-tight text-white"
             >
               {t('common.appName')}
-            </A>
+            </Link>
           </div>
           {authed ? (
             <button
@@ -75,9 +75,9 @@ export const HomePage = createComponent(function HomePage() {
               {t('nav.signOut')}
             </button>
           ) : (
-            <A href={ROUTE_AUTH_SIGNIN} class="text-sm font-medium text-white/80">
+            <Link href={ROUTE_AUTH_SIGNIN} class="text-sm font-medium text-white/80">
               {t('nav.signIn')}
-            </A>
+            </Link>
           )}
         </div>
 
@@ -97,20 +97,20 @@ export const HomePage = createComponent(function HomePage() {
           </p>
 
           <div class="flex flex-col gap-3">
-            <A href={ctaHref}>
+            <Link href={ctaHref}>
               <Button class="h-auto w-full rounded-2xl border-0 py-6 text-base font-semibold text-white shadow-lg shadow-orange-900/30 coral-gradient hover:opacity-90">
                 <span>{ctaLabel}</span>
                 <IconChevronRight size={18} class="ml-1" />
               </Button>
-            </A>
-            <A href={ROUTE_POPULAR_TRIPS}>
+            </Link>
+            <Link href={ROUTE_POPULAR_TRIPS}>
               <Button
                 variant="outline"
                 class="h-auto w-full rounded-2xl border-white/40 bg-white/10 py-6 text-base font-semibold text-white backdrop-blur-sm hover:bg-white/20"
               >
                 {t('nav.popularTrips')}
               </Button>
-            </A>
+            </Link>
           </div>
         </div>
       </section>
@@ -133,20 +133,20 @@ export const HomePage = createComponent(function HomePage() {
               </span>
             ))}
           </div>
-          <A href={ctaHref}>
+          <Link href={ctaHref}>
             <Button class="h-auto w-full rounded-xl border-0 py-5 text-sm font-semibold text-white coral-gradient hover:opacity-90">
               {ctaLabel} <IconArrowRight size={16} class="ml-1.5" />
             </Button>
-          </A>
+          </Link>
         </div>
       </div>
 
       <section class="mt-8 px-5">
         <div class="mb-4 flex items-center justify-between">
           <h2 class="text-xl font-bold text-foreground">{t('nav.popularTrips')}</h2>
-          <A href={ROUTE_POPULAR_TRIPS} class="text-sm font-medium text-[#3b6fa0]">
+          <Link href={ROUTE_POPULAR_TRIPS} class="text-sm font-medium text-[#3b6fa0]">
             {t('home.seeAll')}
-          </A>
+          </Link>
         </div>
         <div class="no-scrollbar flex gap-3 overflow-x-auto pb-2">
           {popularTrips.map((trip) => {
@@ -156,7 +156,7 @@ export const HomePage = createComponent(function HomePage() {
                 ? t('popularTrips.daysSingular')
                 : t('popularTrips.daysTag', { count: String(trip.durationDays) });
             return (
-              <A
+              <Link
                 href={routePopularTripById(trip.id)}
                 class="relative h-56 w-44 shrink-0 overflow-hidden rounded-2xl bg-muted shadow-md"
               >
@@ -170,7 +170,7 @@ export const HomePage = createComponent(function HomePage() {
                     {daysLabel}
                   </span>
                 </div>
-              </A>
+              </Link>
             );
           })}
         </div>
@@ -232,4 +232,4 @@ export const HomePage = createComponent(function HomePage() {
       </div>
     </div>
   );
-});
+}

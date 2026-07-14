@@ -1,10 +1,4 @@
-import {
-  createComponent,
-  createSignal,
-  createEffect,
-  onCleanup,
-  A,
-} from '../../../../index.js';
+import { createSignal, createEffect, onCleanup, Link } from 'grain';
 import { MapView } from '../components/MapView.jsx';
 import { Button } from '../design-system/ui/button.jsx';
 import { Input } from '../design-system/ui/input.jsx';
@@ -29,7 +23,7 @@ const COVERED_CITIES = [
   { id: 'prague', name: 'Prague', lng: 14.4378, lat: 50.0755 },
 ];
 
-export const ExplorePage = createComponent(function ExplorePage() {
+export function ExplorePage() {
   const [query, setQuery] = createSignal('');
   const [selected, setSelected] = createSignal(null);
   const [pickedPlace, setPickedPlace] = createSignal(null);
@@ -167,19 +161,19 @@ export const ExplorePage = createComponent(function ExplorePage() {
               </p>
             ) : null}
             {isAuthenticated() ? (
-              <A
+              <Link
                 href={`${ROUTE_PLAN_NEW}?city=${encodeURIComponent(city.name)}&cityId=${encodeURIComponent(city.id)}`}
               >
                 <Button class="w-full coral-gradient border-0 text-white">
                   {t('explore.generateTrip')}
                 </Button>
-              </A>
+              </Link>
             ) : (
-              <A href={ROUTE_AUTH_SIGNIN}>
+              <Link href={ROUTE_AUTH_SIGNIN}>
                 <Button class="w-full" variant="outline">
                   {t('explore.guestSignInToExplore', { city: city.name })}
                 </Button>
-              </A>
+              </Link>
             )}
           </div>
         ) : (
@@ -204,4 +198,4 @@ export const ExplorePage = createComponent(function ExplorePage() {
       </div>
     </div>
   );
-});
+}

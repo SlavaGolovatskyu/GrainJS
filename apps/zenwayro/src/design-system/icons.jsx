@@ -1,6 +1,6 @@
-import { createComponent } from '../../../../index.js';
 
-export const IconMap = createComponent(function IconMap(props) {
+
+export function IconMap(props) {
   const size = props.size || 20;
   return (
     <svg
@@ -21,9 +21,9 @@ export const IconMap = createComponent(function IconMap(props) {
       <line x1="15" x2="15" y1="6" y2="21" />
     </svg>
   );
-});
+}
 
-export const IconCompass = createComponent(function IconCompass(props) {
+export function IconCompass(props) {
   const size = props.size || 20;
   return (
     <svg
@@ -42,9 +42,9 @@ export const IconCompass = createComponent(function IconCompass(props) {
       <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
     </svg>
   );
-});
+}
 
-export const IconUsers = createComponent(function IconUsers(props) {
+export function IconUsers(props) {
   const size = props.size || 20;
   return (
     <svg
@@ -65,9 +65,9 @@ export const IconUsers = createComponent(function IconUsers(props) {
       <path d="M16 3.13a4 4 0 0 1 0 7.75" />
     </svg>
   );
-});
+}
 
-export const IconBookOpen = createComponent(function IconBookOpen(props) {
+export function IconBookOpen(props) {
   const size = props.size || 20;
   return (
     <svg
@@ -86,9 +86,9 @@ export const IconBookOpen = createComponent(function IconBookOpen(props) {
       <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
     </svg>
   );
-});
+}
 
-export const IconUser = createComponent(function IconUser(props) {
+export function IconUser(props) {
   const size = props.size || 20;
   return (
     <svg
@@ -107,9 +107,9 @@ export const IconUser = createComponent(function IconUser(props) {
       <circle cx="12" cy="7" r="4" />
     </svg>
   );
-});
+}
 
-export const IconStar = createComponent(function IconStar(props) {
+export function IconStar(props) {
   const size = props.size || 20;
   return (
     <svg
@@ -127,9 +127,9 @@ export const IconStar = createComponent(function IconStar(props) {
       <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
     </svg>
   );
-});
+}
 
-export const IconChevronRight = createComponent(function IconChevronRight(props) {
+export function IconChevronRight(props) {
   const size = props.size || 20;
   return (
     <svg
@@ -147,9 +147,9 @@ export const IconChevronRight = createComponent(function IconChevronRight(props)
       <path d="m9 18 6-6-6-6" />
     </svg>
   );
-});
+}
 
-export const IconArrowRight = createComponent(function IconArrowRight(props) {
+export function IconArrowRight(props) {
   const size = props.size || 20;
   return (
     <svg
@@ -168,9 +168,9 @@ export const IconArrowRight = createComponent(function IconArrowRight(props) {
       <path d="m12 5 7 7-7 7" />
     </svg>
   );
-});
+}
 
-export const IconShare = createComponent(function IconShare(props) {
+export function IconShare(props) {
   const size = props.size || 20;
   return (
     <svg
@@ -192,4 +192,4 @@ export const IconShare = createComponent(function IconShare(props) {
       <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" />
     </svg>
   );
-});
+}

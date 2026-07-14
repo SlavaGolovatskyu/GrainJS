@@ -1,10 +1,4 @@
-import {
-  createComponent,
-  createSignal,
-  createEffect,
-  A,
-  useParams,
-} from '../../../../index.js';
+import { createSignal, createEffect, Link, useParams } from 'grain';
 import { fetchPopularTrips } from '../api/client.js';
 import { t } from '../i18n/t.js';
 import {
@@ -32,7 +26,7 @@ function tripCity(trip) {
   return String(raw).charAt(0).toUpperCase() + String(raw).slice(1);
 }
 
-export const PopularTripsPage = createComponent(function PopularTripsPage() {
+export function PopularTripsPage() {
   const [trips, setTrips] = createSignal([]);
   const [total, setTotal] = createSignal(0);
   const [query, setQuery] = createSignal('');
@@ -95,13 +89,13 @@ export const PopularTripsPage = createComponent(function PopularTripsPage() {
           onInput={(e) => setQuery(e.target.value)}
         />
         <div class="mt-3 flex gap-2">
-          <A href={ROUTE_POPULAR_TRIPS_BROWSE}>
+          <Link href={ROUTE_POPULAR_TRIPS_BROWSE}>
             <Button variant="outline" size="sm">
               {t('popularTrips.browseAllCountries', {
                 count: String(Math.max(total(), filtered.length) || '—'),
               })}
             </Button>
-          </A>
+          </Link>
         </div>
       </div>
 
@@ -132,7 +126,7 @@ export const PopularTripsPage = createComponent(function PopularTripsPage() {
                 : '—';
           const days = trip.durationDays || 1;
           return (
-            <A
+            <Link
               href={routePopularTripById(trip.id)}
               class="relative aspect-[4/5] overflow-hidden rounded-3xl bg-[#1e3a5f] shadow-md"
             >
@@ -176,38 +170,38 @@ export const PopularTripsPage = createComponent(function PopularTripsPage() {
                   </p>
                 ) : null}
               </div>
-            </A>
+            </Link>
           );
         })}
       </div>
     </div>
   );
-});
+}
 
-export const PopularTripDetailPage = createComponent(function PopularTripDetailPage() {
+export function PopularTripDetailPage() {
   const params = useParams();
   const id = params().id || params().segments || 'trip';
 
   return (
     <div class="px-4 py-6">
-      <A href={ROUTE_POPULAR_TRIPS} class="text-sm text-[#3b6fa0]">
+      <Link href={ROUTE_POPULAR_TRIPS} class="text-sm text-[#3b6fa0]">
         {t('popularTrips.backToList')}
-      </A>
+      </Link>
       <h1 class="mt-3 text-2xl font-bold capitalize">{String(id)}</h1>
       <p class="mt-2 text-muted-foreground">{t('popularTrips.itinerary')}</p>
       <div class="mt-4 rounded-2xl border border-border bg-card p-4">
         <p class="text-sm text-muted-foreground">{t('popularTrips.noItinerary')}</p>
-        <A href={routePlanById(String(id))} class="mt-4 inline-block">
+        <Link href={routePlanById(String(id))} class="mt-4 inline-block">
           <Button class="coral-gradient border-0 text-white">
             {t('popularTrips.copyTrip')}
           </Button>
-        </A>
+        </Link>
       </div>
     </div>
   );
-});
+}
 
-export const PopularBrowsePage = createComponent(function PopularBrowsePage() {
+export function PopularBrowsePage() {
   const [countries, setCountries] = createSignal([]);
   const [loading, setLoading] = createSignal(true);
 
@@ -253,7 +247,7 @@ export const PopularBrowsePage = createComponent(function PopularBrowsePage() {
       ) : null}
       <div class="flex flex-col gap-2">
         {countries().map((c) => (
-          <A
+          <Link
             href={`${ROUTE_POPULAR_TRIPS}?country=${encodeURIComponent(c.name)}`}
             class="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3 font-medium"
           >
@@ -263,9 +257,9 @@ export const PopularBrowsePage = createComponent(function PopularBrowsePage() {
                 count: String(c.count),
               })}
             </span>
-          </A>
+          </Link>
         ))}
       </div>
     </div>
   );
-});
+}

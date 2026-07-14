@@ -1,4 +1,4 @@
-import { createComponent, A, useLocation } from '../../../../../index.js';
+import { Link, useLocation } from 'grain';
 import { cn } from '../utils/cn.js';
 import {
   APP_SHELL_FOOTER_CLASSES,
@@ -38,7 +38,7 @@ function appPath(pathname) {
   return pathname;
 }
 
-export const AppNavbar = createComponent(function AppNavbar() {
+export function AppNavbar() {
   const location = useLocation();
   const token = useAuthToken();
   const pathname = appPath(location().pathname);
@@ -59,9 +59,9 @@ export const AppNavbar = createComponent(function AppNavbar() {
         <div class="coral-gradient flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
           <IconMap size={16} class="text-white" />
         </div>
-        <A href={ROUTE_HOME} class="text-foreground font-bold tracking-tight">
+        <Link href={ROUTE_HOME} class="text-foreground font-bold tracking-tight">
           {t('common.appName')}
-        </A>
+        </Link>
       </div>
       <div class="flex items-center gap-2">
         {token() ? (
@@ -70,27 +70,27 @@ export const AppNavbar = createComponent(function AppNavbar() {
           </Button>
         ) : (
           <>
-            <A href={ROUTE_AUTH_SIGNIN}>
+            <Link href={ROUTE_AUTH_SIGNIN}>
               <Button variant="ghost" size="sm">
                 {t('nav.signIn')}
               </Button>
-            </A>
-            <A href={ROUTE_AUTH_SIGNUP}>
+            </Link>
+            <Link href={ROUTE_AUTH_SIGNUP}>
               <Button
                 size="sm"
                 class="coral-gradient border-0 text-white hover:opacity-90"
               >
                 {t('nav.signUp')}
               </Button>
-            </A>
+            </Link>
           </>
         )}
       </div>
     </nav>
   );
-});
+}
 
-export const BottomNav = createComponent(function BottomNav() {
+export function BottomNav() {
   const location = useLocation();
   const token = useAuthToken();
   const pathname = appPath(location().pathname);
@@ -151,7 +151,7 @@ export const BottomNav = createComponent(function BottomNav() {
     >
       <div class="mx-auto flex h-16 w-full max-w-4xl items-center justify-around px-2 md:px-4">
         {items.map(({ href, label, Icon, active }) => (
-          <A
+          <Link
             href={href}
             class={cn(
               'flex min-h-[44px] min-w-[44px] flex-col items-center justify-center rounded-xl px-2 py-1 transition-all duration-200',
@@ -176,14 +176,14 @@ export const BottomNav = createComponent(function BottomNav() {
             >
               {label}
             </span>
-          </A>
+          </Link>
         ))}
       </div>
     </nav>
   );
-});
+}
 
-export const AppShell = createComponent(function AppShell(props) {
+export function AppShell(props) {
   const outlet = props.children;
   return (
     <div class={APP_SHELL_ROOT_CLASSES} data-ui-version="v2">
@@ -196,4 +196,4 @@ export const AppShell = createComponent(function AppShell(props) {
       </footer>
     </div>
   );
-});
+}

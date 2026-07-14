@@ -1,4 +1,4 @@
-import { createComponent, Router, Route } from '../../../index.js';
+import { Router, Route } from 'grain';
 import { AppShell } from './design-system/layouts/AppChrome.jsx';
 import { AuthGuard } from './layout/AuthGuard.jsx';
 import { HomePage } from './pages/HomePage.jsx';
@@ -34,7 +34,7 @@ import {
   NotFoundPage,
 } from './pages/AdminPages.jsx';
 
-export const App = createComponent(function App() {
+export function App() {
   return (
     <>
       <AuthGuard />
@@ -70,4 +70,4 @@ export const App = createComponent(function App() {
       </AppShell>
     </>
   );
-});
+}
