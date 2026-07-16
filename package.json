@@ -12,11 +12,19 @@
     "build": "vite build",
     "preview": "vite preview",
     "ssr:demo": "npm run start -w ssr-demo",
-    "pack:lib": "npm pack -w grain"
+    "pack:lib": "npm pack -w grainlet",
+    "pack:vite": "npm pack -w grainlet-vite",
+    "pack:create": "npm pack -w create-grainlet",
+    "publish:libs": "node scripts/publish-libs.mjs"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",
     "@babel/plugin-syntax-jsx": "^7.29.7",
+    "grainlet-vite": "*",
     "vite": "^5.0.0"
+  },
+  "dependencies": {
+    "date-fns": "^4.1.0",
+    "grainlet": "*"
   }
 }

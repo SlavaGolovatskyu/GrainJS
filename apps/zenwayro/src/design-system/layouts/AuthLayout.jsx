@@ -1,4 +1,4 @@
-import { Link } from 'grain';
+import { Link } from 'grainlet';
 import { cn } from '../utils/cn.js';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card.jsx';
 import { t } from '../../i18n/t.js';

@@ -12,8 +12,7 @@ export const EUROPE_MAP_CENTER = [10, 50];
 export const EUROPE_MAP_ZOOM = 4;
 export const CITY_MAP_ZOOM = 13;
 
-export const HOME_HERO_IMAGE =
-  'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=1600&q=80';
+export const HOME_HERO_IMAGE = '/images/home_bg.webp';
 
 export const HOME_QUIZ_STYLE_TAG_KEYS = [
   'home.quizTagFoodie',

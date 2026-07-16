@@ -1,4 +1,4 @@
-import { createSignal, createEffect, onCleanup, render } from 'grain';
+import { createSignal, createEffect, onCleanup, render } from 'grainlet';
 
 function EffectLogs(props) {
   const items = props.logs();

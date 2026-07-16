@@ -1,6 +1,6 @@
-# Zenwayro (framework port)
+# Zenwayro (Grain SPA)
 
-Product UI ported from `test1/` onto **signals / core / route** — Voyage navy + coral design system (Tailwind v4), MapLibre explore/plan, quiz, auth (+ JWT refresh), trips, community, legal, admin.
+Product UI rewritten from [`frontend/`](../../frontend/) (Next.js) onto **grain** — Voyage design system, MapLibre explore/plan, quiz, JWT auth, trips, community, legal, admin.
 
 ## Run
 
@@ -17,23 +17,43 @@ Open [http://localhost:3000/zenwayro](http://localhost:3000/zenwayro).
 | Variable | Default | Purpose |
 |----------|---------|---------|
 | `VITE_API_URL` | `http://localhost:3001` | Backend API |
-| `VITE_GOOGLE_CLIENT_ID` | — | Google Identity Services client ID for Continue with Google |
+| `VITE_GOOGLE_CLIENT_ID` | — | Google Identity Services (Continue with Google) |
+| `VITE_MAP_ASSETS_BASE` | `''` | MapLibre style / PMTiles CDN base (OSM fallback if empty) |
 
 ## Layout
 
 ```
 apps/zenwayro/src/
-  design-system/     tokens, ui (Button/Input/Card/…), layouts (AppShell/Auth/Footer)
-  api/               client + JWT refresh + createResource helper
-  i18n/              en.json from test1 + t()
-  pages/             home, auth, quiz, trips, explore, plan, popular, legal, admin
-  components/        MapView (maplibre-gl)
+  api/             http + domain modules (auth, trips, pois, …) + endpoints
+  utils/           slugify, errors, images
+  lib/             pending quiz / trip resume
+  design-system/   tokens, ui, layouts
+  i18n/            en.json + t()
+  pages/           home, auth, quiz, trips, explore, plan, popular, legal, admin
+  components/      MapView, Toast, NotificationsPanel
 ```
+
+## Port phases (from `frontend/`)
+
+0. Foundation — split API, helpers, toast, assets  
+1. Auth + quiz pending resume + home popular preview  
+2. Explore POIs / filters / engagement  
+3. Trips invitations + notifications SSE  
+4. Plan editor (itinerary mutations, share, routes)  
+5. Popular directory/detail + shared plan by slug  
+6. Settings photo + admin panels + isAdmin gate  
+7. Hardening — strip demo fallbacks where APIs work  
 
 ## Auth
 
-Credentials login/register against the API. Google uses GIS + `POST /api/auth/sync` `{ provider: 'google', idToken }` (same as NextAuth in test1). Access + refresh tokens in `localStorage`; `401` triggers `/api/auth/refresh`.
+Credentials + Google GIS → `POST /api/auth/sync`. Tokens in `localStorage`; `401` refreshes via `/api/auth/refresh`. Guest quiz prefs stored as `pendingQuiz` and flushed after login.
+
+## Smoke
+
+```bash
+npx vite-node scripts/smoke-zenwayro.mjs
+```
 
 ## Notes
 
-UI primitives and pages are plain PascalCase functions (React-like); `createComponent` is optional. Plan itinerary uses HTML5 drag-and-drop. Explore city search debounces to `/api/cities/search` with local covered-city fallback.
+Plain PascalCase Grain components; use flow (`Show`/`For`/`Suspense`) where helpful. Do not delete `frontend/` until parity is signed off.

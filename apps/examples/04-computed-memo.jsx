@@ -1,4 +1,4 @@
-import { createSignal, createMemo, render } from 'grain';
+import { createSignal, createMemo, render } from 'grainlet';
 
 export function Calculator() {
   const [price, setPrice] = createSignal(100);

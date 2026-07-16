@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'grain';
+import { Link, useLocation } from 'grainlet';
 import { cn } from '../utils/cn.js';
 import {
   APP_SHELL_FOOTER_CLASSES,
@@ -19,6 +19,8 @@ import {
 } from '../../constants/routes.js';
 import { logout, useAuthToken } from '../../api/client.js';
 import { t } from '../../i18n/t.js';
+import { Button } from '../ui/button.jsx';
+import { NotificationsPanel } from '../../components/NotificationsPanel.jsx';
 import {
   IconBookOpen,
   IconCompass,
@@ -26,7 +28,6 @@ import {
   IconUser,
   IconUsers,
 } from '../icons.jsx';
-import { Button } from '../ui/button.jsx';
 
 const CORAL = '#ff6b4a';
 const BASENAME = '/zenwayro';
@@ -38,10 +39,12 @@ function appPath(pathname) {
   return pathname;
 }
 
+/** Faithful port of frontend AppNavbar.component.tsx */
 export function AppNavbar() {
   const location = useLocation();
   const token = useAuthToken();
   const pathname = appPath(location().pathname);
+  const showAuthenticatedUi = Boolean(token());
 
   if (NAVBAR_EXCLUDED_PATHS.includes(pathname)) return null;
   if (
@@ -59,15 +62,18 @@ export function AppNavbar() {
         <div class="coral-gradient flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
           <IconMap size={16} class="text-white" />
         </div>
-        <Link href={ROUTE_HOME} class="text-foreground font-bold tracking-tight">
+        <Link href={ROUTE_HOME} class="!text-foreground font-bold tracking-tight">
           {t('common.appName')}
         </Link>
       </div>
       <div class="flex items-center gap-2">
-        {token() ? (
-          <Button variant="ghost" size="sm" onClick={logout}>
-            {t('nav.signOut')}
-          </Button>
+        {showAuthenticatedUi ? (
+          <>
+            <NotificationsPanel />
+            <Button variant="ghost" size="sm" onClick={logout}>
+              {t('nav.signOut')}
+            </Button>
+          </>
         ) : (
           <>
             <Link href={ROUTE_AUTH_SIGNIN}>
@@ -90,10 +96,12 @@ export function AppNavbar() {
   );
 }
 
+/** Faithful port of frontend BottomNav.component.tsx */
 export function BottomNav() {
   const location = useLocation();
   const token = useAuthToken();
   const pathname = appPath(location().pathname);
+  const showAuthenticatedUi = Boolean(token());
 
   if (
     NAVBAR_EXCLUDED_PATHS.includes(pathname) ||
@@ -103,44 +111,43 @@ export function BottomNav() {
     return null;
   }
 
-  const tripsHref = token() ? ROUTE_TRIPS : ROUTE_AUTH_SIGNIN;
+  const tripsHref = showAuthenticatedUi ? ROUTE_TRIPS : ROUTE_AUTH_SIGNIN;
 
-  const items = [
+  const navItems = [
     {
       href: ROUTE_HOME,
       label: t('nav.home'),
       Icon: IconCompass,
-      active: pathname === ROUTE_HOME,
+      match: (path) => path === ROUTE_HOME,
     },
     {
       href: ROUTE_EXPLORE,
       label: t('nav.explore'),
       Icon: IconMap,
-      active: pathname === ROUTE_EXPLORE || pathname.startsWith(`${ROUTE_EXPLORE}/`),
+      match: (path) => path === ROUTE_EXPLORE || path.startsWith(`${ROUTE_EXPLORE}/`),
     },
     {
       href: ROUTE_POPULAR_TRIPS,
       label: t('nav.community'),
       Icon: IconUsers,
-      active:
-        pathname === ROUTE_POPULAR_TRIPS ||
-        pathname.startsWith(`${ROUTE_POPULAR_TRIPS}/`),
+      match: (path) =>
+        path === ROUTE_POPULAR_TRIPS || path.startsWith(`${ROUTE_POPULAR_TRIPS}/`),
     },
     {
       href: ROUTE_PLAN_NEW,
       label: t('nav.planTrip'),
       Icon: IconBookOpen,
-      active: pathname.startsWith('/plan'),
+      match: (path) => path.startsWith('/plan'),
     },
     {
       href: tripsHref,
       label: t('nav.me'),
       Icon: IconUser,
-      active:
-        pathname === ROUTE_TRIPS ||
-        pathname.startsWith(`${ROUTE_TRIPS}/`) ||
-        pathname === '/settings' ||
-        pathname.startsWith('/settings'),
+      match: (path) =>
+        path === ROUTE_TRIPS ||
+        path.startsWith(`${ROUTE_TRIPS}/`) ||
+        path === '/settings' ||
+        path.startsWith('/settings'),
     },
   ];
 
@@ -150,34 +157,38 @@ export function BottomNav() {
       aria-label={t('nav.primaryNavigation')}
     >
       <div class="mx-auto flex h-16 w-full max-w-4xl items-center justify-around px-2 md:px-4">
-        {items.map(({ href, label, Icon, active }) => (
-          <Link
-            href={href}
-            class={cn(
-              'flex min-h-[44px] min-w-[44px] flex-col items-center justify-center rounded-xl px-2 py-1 transition-all duration-200',
-              active ? 'text-[#ff6b4a]' : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            <div class="relative flex flex-col items-center">
-              <Icon
-                size={22}
-                strokeWidth={active ? 2.5 : 1.8}
-                style={active ? `stroke:${CORAL}` : undefined}
-              />
-              {active ? (
-                <span class="mt-0.5 h-1 w-1 rounded-full bg-[#ff6b4a]" />
-              ) : null}
-            </div>
-            <span
+        {navItems.map(({ href, label, Icon, match }) => {
+          const isActive = match(pathname);
+          return (
+            <Link
+              href={href}
               class={cn(
-                'mt-0.5 text-[10px] font-medium tracking-wide',
-                active ? 'text-[#ff6b4a]' : 'text-muted-foreground'
+                'flex min-h-[44px] min-w-[44px] flex-col items-center justify-center rounded-xl px-2 py-1 transition-all duration-200',
+                isActive ? 'text-[#ff6b4a]' : 'text-muted-foreground hover:text-foreground'
               )}
             >
-              {label}
-            </span>
-          </Link>
-        ))}
+              <div class="relative flex flex-col items-center">
+                <Icon
+                  size={22}
+                  class="transition-all duration-200"
+                  strokeWidth={isActive ? 2.5 : 1.8}
+                  style={isActive ? `stroke:${CORAL}` : undefined}
+                />
+                {isActive ? (
+                  <span class="mt-0.5 h-1 w-1 rounded-full bg-[#ff6b4a]" />
+                ) : null}
+              </div>
+              <span
+                class={cn(
+                  'mt-0.5 text-[10px] font-medium tracking-wide',
+                  isActive ? 'text-[#ff6b4a]' : 'text-muted-foreground'
+                )}
+              >
+                {label}
+              </span>
+            </Link>
+          );
+        })}
       </div>
     </nav>
   );

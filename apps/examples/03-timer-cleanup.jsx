@@ -1,4 +1,4 @@
-import { createSignal, createEffect, render } from 'grain';
+import { createSignal, createEffect, render } from 'grainlet';
 
 export function Timer() {
   const [seconds, setSeconds] = createSignal(0);

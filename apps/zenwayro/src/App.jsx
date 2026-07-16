@@ -1,6 +1,7 @@
-import { Router, Route } from 'grain';
+import { Router, Route } from 'grainlet';
 import { AppShell } from './design-system/layouts/AppChrome.jsx';
 import { AuthGuard } from './layout/AuthGuard.jsx';
+import { ToastHost } from './components/Toast.jsx';
 import { HomePage } from './pages/HomePage.jsx';
 import { ExplorePage } from './pages/ExplorePage.jsx';
 import { QuizPage } from './pages/QuizPage.jsx';
@@ -12,6 +13,7 @@ import {
   AuthResetPasswordPage,
   AuthSignInPage,
   AuthSignUpPage,
+  AuthVerifyPage,
   AuthVerifyPendingPage,
 } from './pages/AuthPages.jsx';
 import {
@@ -56,6 +58,7 @@ export function App() {
           <Route path="/auth/forgot-password" component={AuthForgotPasswordPage} />
           <Route path="/auth/reset-password" component={AuthResetPasswordPage} />
           <Route path="/auth/verify-pending" component={AuthVerifyPendingPage} />
+          <Route path="/auth/verify" component={AuthVerifyPage} />
           <Route path="/terms" component={TermsPage} />
           <Route path="/privacy" component={PrivacyPage} />
           <Route path="/cookies" component={CookiesPage} />
@@ -67,6 +70,7 @@ export function App() {
           <Route path="/admin/cities/create" component={AdminCitiesPage} />
           <Route path="*" component={NotFoundPage} />
         </Router>
+        <ToastHost />
       </AppShell>
     </>
   );

@@ -1,4 +1,4 @@
-import { createSignal, render } from 'grain';
+import { createSignal, render } from 'grainlet';
 
 export function BasicCounter(props) {
   const [count, setCount] = createSignal(props.initialCount || 0);

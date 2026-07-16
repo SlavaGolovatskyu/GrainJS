@@ -1,23 +1,29 @@
-# grain
+# grainlet
 
 Fine-grained reactive UI: **signals**, **JSX**, **History API routing**, and **SSR / hydrate**.
 
 ## Install
 
 ```bash
-npm install grain
+npm install grainlet
 ```
 
-For the Vite JSX plugin (recommended):
+For Vite JSX (dev only — install as `devDependencies`):
 
 ```bash
-npm install -D vite @babel/core @babel/plugin-syntax-jsx
+npm install -D grainlet-vite vite @babel/core @babel/plugin-syntax-jsx
+```
+
+Or scaffold a project:
+
+```bash
+npx create-grainlet my-app
 ```
 
 ## Usage
 
 ```js
-import { createSignal, render } from 'grain';
+import { createSignal, render } from 'grainlet';
 
 function App() {
   const [count, setCount] = createSignal(0);
@@ -35,13 +41,13 @@ render(App, document.getElementById('app'));
 
 ```js
 import { defineConfig } from 'vite';
-import { grainJsx } from 'grain/vite';
+import { grainJsx } from 'grainlet-vite';
 
 export default defineConfig({
   plugins: [grainJsx()],
   esbuild: {
     jsx: 'automatic',
-    jsxImportSource: 'grain',
+    jsxImportSource: 'grainlet',
   },
 });
 ```
@@ -50,14 +56,14 @@ export default defineConfig({
 
 | Import | Purpose |
 |--------|---------|
-| `grain` | Public API (signals, render, hydrate, router, SSR) |
-| `grain/jsx-runtime` | Automatic JSX runtime |
-| `grain/vite` | `grainJsx()` Vite plugin |
+| `grainlet` | Public API (signals, render, hydrate, router, SSR) |
+| `grainlet/jsx-runtime` | Automatic JSX runtime |
+| `grainlet-vite` | `grainJsx()` Vite plugin (separate package, `devDependency`) |
 
 ## Control flow
 
 ```js
-import { Show, For, Switch, Match, Suspense, createResource } from 'grain';
+import { Show, For, Switch, Match, Suspense, createResource } from 'grainlet';
 ```
 
 | Component | Role |
@@ -73,7 +79,7 @@ Prefer these over `{cond() && <X/>}` so conditionals update without re-running t
 ## SSR
 
 ```js
-import { renderToString, wrapHtmlDocument, hydrate } from 'grain';
+import { renderToString, wrapHtmlDocument, hydrate } from 'grainlet';
 
 const body = renderToString(App, {}, { url: 'http://localhost/' });
 ```

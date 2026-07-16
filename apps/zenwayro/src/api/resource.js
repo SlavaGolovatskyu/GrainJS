@@ -1,4 +1,4 @@
-import { createSignal, createEffect, onCleanup } from 'grain';
+import { createSignal, createEffect, onCleanup } from 'grainlet';
 
 /**
  * Tiny query helper — replaces common TanStack Query read patterns.

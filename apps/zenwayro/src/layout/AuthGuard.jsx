@@ -1,4 +1,4 @@
-import { createEffect, navigate, useLocation } from 'grain';
+import { createEffect, navigate, useLocation } from 'grainlet';
 import { isAuthenticated } from '../api/client.js';
 import { isPublicPathname, routeAuthSignInWithCallback } from '../constants/routes.js';
 

@@ -5,14 +5,14 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /**
  * Vite pre-plugin: wrap reactive JSX expressions as accessors before esbuild JSX.
- * Requires @babel/core and @babel/plugin-syntax-jsx.
+ * Requires @babel/core and @babel/plugin-syntax-jsx (peerDependencies).
  *
- *   import { grainJsx } from 'grain/vite'
+ *   import { grainJsx } from 'grainlet-vite'
  *   plugins: [grainJsx()]
  */
 export function grainJsx() {
   return {
-    name: 'grain-jsx',
+    name: 'grainlet-jsx',
     enforce: 'pre',
     async transform(code, id) {
       if (!/\.[cm]?[jt]sx$/.test(id)) return null;
@@ -30,7 +30,7 @@ export function grainJsx() {
         wrapPlugin = wrapMod.default;
       } catch (err) {
         this.warn(
-          `grain-jsx: missing babel deps or plugin failed (${err.message}). ` +
+          `grainlet-vite: missing babel deps or plugin failed (${err.message}). ` +
             'Install @babel/core and @babel/plugin-syntax-jsx.'
         );
         return null;

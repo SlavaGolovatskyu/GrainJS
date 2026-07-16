@@ -6,24 +6,27 @@ This provides React-like JSX syntax support. You can write JSX directly in your 
 
 ### Option 1: Using Vite (Recommended)
 
-If you're using Vite, add this to your `vite.config.js`:
+Install the separate Vite plugin (`grainlet-vite`) as a **devDependency**, then:
 
 ```javascript
 import { defineConfig } from 'vite';
+import { grainJsx } from 'grainlet-vite';
 
 export default defineConfig({
+  plugins: [grainJsx()],
   esbuild: {
-    jsxFactory: 'jsx',
-    jsxFragment: 'Fragment',
-    jsxImportSource: './core/jsx-compiler-new'
-  }
+    jsx: 'automatic',
+    jsxImportSource: 'grainlet',
+  },
 });
 ```
+
+Or scaffold with `npx create-grainlet my-app`.
 
 Then you can write JSX in `.jsx` files:
 
 ```javascript
-import { jsx } from './core/jsx-compiler-new/jsx-runtime.js';
+import { createSignal } from 'grainlet';
 
 const Counter = () => {
   const [count, setCount] = createSignal(0);

@@ -8,7 +8,7 @@ import http from 'node:http';
 import { createServer as createViteServer } from 'vite';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import { grainJsx } from 'grain/vite';
+import { grainJsx } from 'grainlet-vite';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '../..');
@@ -21,12 +21,12 @@ const vite = await createViteServer({
   plugins: [grainJsx()],
   esbuild: {
     jsx: 'automatic',
-    jsxImportSource: 'grain',
+    jsxImportSource: 'grainlet',
   },
 });
 
 async function renderPage(url) {
-  const { renderToString, wrapHtmlDocument } = await vite.ssrLoadModule('grain');
+  const { renderToString, wrapHtmlDocument } = await vite.ssrLoadModule('grainlet');
   const { CounterApp } = await vite.ssrLoadModule('/apps/ssr-demo/CounterApp.jsx');
 
   const body = renderToString(CounterApp, {}, { url });

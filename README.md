@@ -1,11 +1,13 @@
-# grain monorepo
+# grainlet monorepo
 
-Workspace root for the **grain** library and local apps/examples.
+Workspace root for the **grainlet** library, Vite tooling, scaffolder, and local apps.
 
 | Path | Role |
 |------|------|
-| [`packages/grain`](packages/grain) | Publishable npm package (`signals`, `core`, `route`, `ssr`) |
-| [`apps/examples`](apps/examples) | Framework demos (ex-signals-example) |
+| [`packages/grain`](packages/grain) | Runtime npm package `grainlet` (signals, JSX runtime, route, SSR) |
+| [`packages/vite`](packages/vite) | Dev package `grainlet-vite` (Vite JSX plugin) |
+| [`packages/create-grainlet`](packages/create-grainlet) | `npx create-grainlet` project scaffolder |
+| [`apps/examples`](apps/examples) | Framework demos |
 | [`apps/zenwayro`](apps/zenwayro) | Product app on the library |
 | [`apps/ssr-demo`](apps/ssr-demo) | SSR + hydrate demo server |
 
@@ -24,35 +26,61 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Use the library in another project
 
+**Scaffold (recommended):**
+
 ```bash
-npm install grain
-npm install -D vite @babel/core @babel/plugin-syntax-jsx
+npx create-grainlet my-app
+cd my-app
+npm install
+npm run dev
+```
+
+**Manual install:**
+
+```bash
+npm install grainlet
+npm install -D grainlet-vite vite @babel/core @babel/plugin-syntax-jsx
 ```
 
 ```js
-import { createSignal, render } from 'grain';
-import { grainJsx } from 'grain/vite';
+import { createSignal, render } from 'grainlet';
+import { grainJsx } from 'grainlet-vite';
 ```
 
 Vite:
 
 ```js
 import { defineConfig } from 'vite';
-import { grainJsx } from 'grain/vite';
+import { grainJsx } from 'grainlet-vite';
 
 export default defineConfig({
   plugins: [grainJsx()],
-  esbuild: { jsx: 'automatic', jsxImportSource: 'grain' },
+  esbuild: { jsx: 'automatic', jsxImportSource: 'grainlet' },
 });
 ```
 
+`grainlet` is a production dependency. `grainlet-vite` and Babel peers are **devDependencies** only.
+
 See [`packages/grain/README.md`](packages/grain/README.md) for the full public API.
 
-## Publish the library
+## Publish packages
+
+Bump versions in the packages you changed, then:
 
 ```bash
-npm pack -w grain   # inspect tarball
-npm publish -w grain
+npm run publish:libs
+# with 2FA:  npm run publish:libs -- --otp=123456
+# preview:   npm run publish:libs -- --dry-run
+```
+
+Only packages whose **local version is not yet on npm** are published (order: `grainlet-vite` → `create-grainlet` → `grainlet`).
+
+Or pack individually:
+
+```bash
+npm run pack:lib      # grainlet
+npm run pack:vite     # grainlet-vite
+npm run pack:create   # create-grainlet
 ```
 
 ## Features

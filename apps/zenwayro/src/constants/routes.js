@@ -8,9 +8,12 @@ export const ROUTE_ADMIN_IMAGES = '/admin/images';
 export const ROUTE_ADMIN_AI_ENRICHMENT = '/admin/ai-enrichment';
 export const ROUTE_AUTH_SIGNUP = '/auth/signup';
 export const ROUTE_AUTH_SIGNIN = '/auth/signin';
+export const ROUTE_AUTH_SIGNIN_TRIP_PENDING =
+  '/auth/signin?tripPending=true';
 export const ROUTE_AUTH_FORGOT_PASSWORD = '/auth/forgot-password';
 export const ROUTE_AUTH_RESET_PASSWORD = '/auth/reset-password';
 export const ROUTE_AUTH_VERIFY_PENDING = '/auth/verify-pending';
+export const ROUTE_AUTH_VERIFY = '/auth/verify';
 export const ROUTE_TERMS = '/terms';
 export const ROUTE_PRIVACY = '/privacy';
 export const ROUTE_CONTACT = '/contact';
@@ -27,6 +30,17 @@ export const routeSharedPlanBySlug = (slug) => `/plan/shared/${slug}`;
 
 export const routeAuthSignInWithCallback = (callbackUrl) =>
   `${ROUTE_AUTH_SIGNIN}?callbackUrl=${encodeURIComponent(callbackUrl)}`;
+
+export const routeAuthVerifyPendingWithEmail = (email) =>
+  `${ROUTE_AUTH_VERIFY_PENDING}?email=${encodeURIComponent(email || '')}`;
+
+export const routePlanNewWithCity = (city, cityId) => {
+  const qs = new URLSearchParams();
+  if (city) qs.set('city', city);
+  if (cityId) qs.set('cityId', cityId);
+  const s = qs.toString();
+  return s ? `${ROUTE_PLAN_NEW}?${s}` : ROUTE_PLAN_NEW;
+};
 
 const PUBLIC_EXACT = [
   ROUTE_HOME,

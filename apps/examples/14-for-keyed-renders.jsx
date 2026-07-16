@@ -1,4 +1,4 @@
-import { createSignal, render, For } from 'grain';
+import { createSignal, render, For } from 'grainlet';
 
 /**
  * Proves keyed For only re-runs the changed row.

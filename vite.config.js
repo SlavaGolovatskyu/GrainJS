@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
-import { grainJsx } from 'grain/vite';
+import { grainJsx } from 'grainlet-vite';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -26,7 +26,7 @@ export default defineConfig({
   ],
   esbuild: {
     jsx: 'automatic',
-    jsxImportSource: 'grain',
+    jsxImportSource: 'grainlet',
   },
   resolve: {
     alias: {

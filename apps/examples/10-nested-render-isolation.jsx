@@ -1,4 +1,4 @@
-import { createSignal, render } from 'grain';
+import { createSignal, render } from 'grainlet';
 
 /**
  * Each wrapper closes over its own render counter. The number only increases when

@@ -7,7 +7,7 @@ import {
   Match,
   Suspense,
   createResource,
-} from 'grain';
+} from 'grainlet';
 
 function Page(props) {
   return (

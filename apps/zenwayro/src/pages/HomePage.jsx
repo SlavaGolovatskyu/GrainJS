@@ -1,5 +1,6 @@
-import { Link } from 'grain';
+import { createSignal, createEffect, Link } from 'grainlet';
 import { Button } from '../design-system/ui/button.jsx';
+import { AppFooter } from '../design-system/layouts/AuthLayout.jsx';
 import {
   IconArrowRight,
   IconChevronRight,
@@ -8,7 +9,12 @@ import {
   IconStar,
 } from '../design-system/icons.jsx';
 import { t } from '../i18n/t.js';
-import { isAuthenticated, logout, useAuthToken } from '../api/client.js';
+import {
+  fetchPopularTrips,
+  isAuthenticated,
+  logout,
+  useAuthToken,
+} from '../api/client.js';
 import {
   ROUTE_AUTH_SIGNIN,
   ROUTE_HOME,
@@ -17,24 +23,75 @@ import {
   ROUTE_QUIZ,
   routePopularTripById,
 } from '../constants/routes.js';
-import { AppFooter } from '../design-system/layouts/AuthLayout.jsx';
-import {
-  HOME_HERO_IMAGE,
-  HOME_LANDING_FEATURES,
-  HOME_PLAN_STYLE_TAG_KEYS,
-  HOME_QUIZ_STYLE_TAG_KEYS,
-} from '../constants/product.js';
+import { resolveImageUrl } from '../utils/images.js';
+import { normalizeList } from '../utils/errors.js';
 
-const SAMPLE_POPULAR = [
-  { id: 'lisbon', city: 'lisbon', durationDays: 2, cityImageCdnUrl: '' },
-  { id: 'paris', city: 'paris', durationDays: 3, cityImageCdnUrl: '' },
-  { id: 'rome', city: 'rome', durationDays: 4, cityImageCdnUrl: '' },
+/** Exact values from frontend HomePageV2.constants.ts */
+export const HOME_HERO_IMAGE = '/images/home_bg.webp';
+export const HOME_POPULAR_TRIPS_PREVIEW_LIMIT = 10;
+export const HOME_QUIZ_STYLE_TAG_KEYS = [
+  'home.quizTagFoodie',
+  'home.quizTagCulture',
+  'home.quizTagAdventure',
+  'home.quizTagRelaxed',
+];
+export const HOME_PLAN_STYLE_TAG_KEYS = [
+  'home.planTagWalking',
+  'home.planTagDayByDay',
+  'home.planTagLocal',
+  'home.planTagShare',
+];
+export const HOME_LANDING_FEATURES = [
+  {
+    iconKey: 'plan',
+    titleKey: 'home.landingFeaturePlanTitle',
+    descKey: 'home.landingFeaturePlanDesc',
+    iconClass: 'bg-[#0f1b3d]',
+  },
+  {
+    iconKey: 'explore',
+    titleKey: 'home.landingFeatureExploreTitle',
+    descKey: 'home.landingFeatureExploreDesc',
+    iconClass: 'bg-[#1e3a5f]',
+  },
+  {
+    iconKey: 'share',
+    titleKey: 'home.landingFeatureShareTitle',
+    descKey: 'home.landingFeatureShareDesc',
+    iconClass: 'coral-gradient',
+  },
 ];
 
+/**
+ * Faithful Grain port of frontend HomePageV2.component.tsx — same structure & classes.
+ */
 export function HomePage() {
   const token = useAuthToken();
-  const authed = Boolean(token());
-  const isPlanMode = authed || isAuthenticated();
+  const showAuthenticatedUi = Boolean(token()) || isAuthenticated();
+  const [popularTrips, setPopularTrips] = createSignal([]);
+
+  createEffect(() => {
+    let cancelled = false;
+    fetchPopularTrips({
+      limit: String(HOME_POPULAR_TRIPS_PREVIEW_LIMIT),
+      sort: 'likes',
+      page: '1',
+    })
+      .then((data) => {
+        if (cancelled) return;
+        setPopularTrips(normalizeList(data, 'trips').length
+          ? normalizeList(data, 'trips')
+          : normalizeList(data, 'items'));
+      })
+      .catch(() => {
+        if (!cancelled) setPopularTrips([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  });
+
+  const isPlanMode = showAuthenticatedUi;
   const ctaHref = isPlanMode ? ROUTE_PLAN_NEW : ROUTE_QUIZ;
   const ctaLabel = isPlanMode ? t('nav.planTrip') : t('home.startQuiz');
   const cardTitleKey = isPlanMode ? 'home.planCardTitle' : 'home.quizCardTitle';
@@ -44,7 +101,6 @@ export function HomePage() {
   const cardTagKeys = isPlanMode
     ? HOME_PLAN_STYLE_TAG_KEYS
     : HOME_QUIZ_STYLE_TAG_KEYS;
-  const popularTrips = SAMPLE_POPULAR;
 
   return (
     <div class="min-h-full bg-background">
@@ -61,12 +117,12 @@ export function HomePage() {
             </div>
             <Link
               href={ROUTE_HOME}
-              class="text-xl font-bold tracking-tight text-white"
+              class="!text-xl !font-bold tracking-tight !text-white"
             >
               {t('common.appName')}
             </Link>
           </div>
-          {authed ? (
+          {showAuthenticatedUi ? (
             <button
               type="button"
               onClick={logout}
@@ -141,47 +197,64 @@ export function HomePage() {
         </div>
       </div>
 
-      <section class="mt-8 px-5">
-        <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-xl font-bold text-foreground">{t('nav.popularTrips')}</h2>
-          <Link href={ROUTE_POPULAR_TRIPS} class="text-sm font-medium text-[#3b6fa0]">
-            {t('home.seeAll')}
-          </Link>
-        </div>
-        <div class="no-scrollbar flex gap-3 overflow-x-auto pb-2">
-          {popularTrips.map((trip) => {
-            const title = trip.city.charAt(0).toUpperCase() + trip.city.slice(1);
-            const daysLabel =
-              trip.durationDays === 1
-                ? t('popularTrips.daysSingular')
-                : t('popularTrips.daysTag', { count: String(trip.durationDays) });
-            return (
-              <Link
-                href={routePopularTripById(trip.id)}
-                class="relative h-56 w-44 shrink-0 overflow-hidden rounded-2xl bg-muted shadow-md"
-              >
-                <div class="flex h-full w-full items-center justify-center bg-[#1e3a5f] text-3xl font-bold text-white">
-                  {title.charAt(0)}
-                </div>
-                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                <div class="absolute bottom-0 left-0 right-0 p-3">
-                  <p class="text-base font-bold text-white">{title}</p>
-                  <span class="mt-1 inline-block rounded-full bg-[#ff6b4a]/90 px-2 py-0.5 text-xs font-semibold text-white">
-                    {daysLabel}
-                  </span>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
+      {popularTrips().length > 0 ? (
+        <section class="mt-8 px-5">
+          <div class="mb-4 flex items-center justify-between">
+            <h2 class="text-xl font-bold text-foreground">{t('nav.popularTrips')}</h2>
+            <Link href={ROUTE_POPULAR_TRIPS} class="text-sm font-medium text-[#3b6fa0]">
+              {t('home.seeAll')}
+            </Link>
+          </div>
+          <div class="no-scrollbar flex gap-3 overflow-x-auto pb-2">
+            {popularTrips().map((trip) => {
+              const cityName = trip.city || trip.title || 'Trip';
+              const title =
+                String(cityName).charAt(0).toUpperCase() + String(cityName).slice(1);
+              const heroUrl = resolveImageUrl(
+                (trip.cityImageCdnUrl || trip.imageUrl || '').trim()
+              );
+              const days = trip.durationDays || 1;
+              const daysLabel =
+                days === 1
+                  ? t('popularTrips.daysSingular')
+                  : t('popularTrips.daysTag', { count: String(days) });
+
+              return (
+                <Link
+                  href={routePopularTripById(trip.id)}
+                  class="relative h-56 w-44 shrink-0 overflow-hidden rounded-2xl bg-muted shadow-md"
+                >
+                  {heroUrl ? (
+                    <img src={heroUrl} alt="" class="h-full w-full object-cover" />
+                  ) : (
+                    <div class="flex h-full w-full items-center justify-center bg-[#1e3a5f] text-3xl font-bold text-white">
+                      {title.charAt(0)}
+                    </div>
+                  )}
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  <div class="absolute bottom-0 left-0 right-0 p-3">
+                    <p class="text-base font-bold text-white">{title}</p>
+                    <span class="mt-1 inline-block rounded-full bg-[#ff6b4a]/90 px-2 py-0.5 text-xs font-semibold text-white">
+                      {daysLabel}
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
 
       <section class="mt-10 px-5">
         <h2 class="mb-5 text-xl font-bold text-foreground">{t('home.whyZenwayro')}</h2>
         <div class="flex flex-col gap-4">
           {HOME_LANDING_FEATURES.map(({ iconKey, titleKey, descKey, iconClass }) => {
             const Icon =
-              iconKey === 'share' ? IconShare : iconKey === 'explore' ? IconStar : IconMap;
+              iconKey === 'share'
+                ? IconShare
+                : iconKey === 'explore'
+                  ? IconStar
+                  : IconMap;
             return (
               <div class="flex items-start gap-4 rounded-2xl border border-border bg-card p-5">
                 <div
@@ -227,7 +300,7 @@ export function HomePage() {
         </div>
       </section>
 
-      <div class="mt-8 hidden lg:block">
+      <div class="hidden lg:block">
         <AppFooter />
       </div>
     </div>

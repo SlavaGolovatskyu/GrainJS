@@ -1,4 +1,4 @@
-import { createSignal } from 'grain';
+import { createSignal } from 'grainlet';
 
 function Badge(props) {
   return <span class="badge">{props.label}</span>;

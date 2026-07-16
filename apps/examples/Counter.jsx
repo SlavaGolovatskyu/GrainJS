@@ -5,9 +5,9 @@
  * Run: npm run dev
  */
 
-import { createSignal, render } from 'grain';
+import { createSignal, render } from 'grainlet';
 // Vite should auto-inject this, but adding it explicitly to ensure it works
-import { jsx } from 'grain/jsx-runtime';
+import { jsx } from 'grainlet/jsx-runtime';
 
 export function Counter() {
   const [count, setCount] = createSignal(0);

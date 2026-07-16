@@ -1,4 +1,4 @@
-import { createSignal, createEffect, render } from 'grain';
+import { createSignal, createEffect, render } from 'grainlet';
 
 const API = 'https://jsonplaceholder.typicode.com';
 

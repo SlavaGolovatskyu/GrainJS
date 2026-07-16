@@ -7,9 +7,10 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "grain": "*"
+    "grainlet": "*"
   },
   "devDependencies": {
+    "grainlet-vite": "*",
     "vite": "^5.0.0"
   }
 }

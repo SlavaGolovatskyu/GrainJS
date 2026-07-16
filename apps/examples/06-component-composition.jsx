@@ -1,4 +1,4 @@
-import { createSignal, createEffect, render } from 'grain';
+import { createSignal, createEffect, render } from 'grainlet';
 
 export function Button(props) {
   const handleClick = props.onClick || props.onclick || (() => {});
