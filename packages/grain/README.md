@@ -63,7 +63,18 @@ export default defineConfig({
 ## Control flow
 
 ```js
-import { Show, For, Switch, Match, Suspense, createResource } from 'grainlet';
+import {
+  Show,
+  For,
+  Switch,
+  Match,
+  Suspense,
+  ErrorBoundary,
+  Portal,
+  createContext,
+  useContext,
+  createResource,
+} from 'grainlet';
 ```
 
 | Component | Role |
@@ -72,9 +83,99 @@ import { Show, For, Switch, Match, Suspense, createResource } from 'grainlet';
 | `For` | Map `each` list to children; prefers `item.id` keys |
 | `Switch` / `Match` | First matching `when` branch |
 | `Suspense` | `fallback` while nested `createResource` is pending |
+| `ErrorBoundary` | Catch render/update errors; `fallback` or `(error, reset) => …` |
+| `Portal` | Render children into `document.body` (or `mount`) |
+| `createContext` / `useContext` | Share data without prop drilling (`Provider` + consume) |
 | `createResource` | Async data `[resource]` — `resource()` reads value |
 
 Prefer these over `{cond() && <X/>}` so conditionals update without re-running the parent.
+
+```js
+<ErrorBoundary
+  fallback={(error, reset) => (
+    <div>
+      <p>Something went wrong: {error.message}</p>
+      <button type="button" onClick={reset}>Try Again</button>
+    </div>
+  )}
+>
+  <ErrorProne />
+</ErrorBoundary>
+```
+
+Event handlers and `setTimeout` callbacks are not caught (same as Solid).
+
+```js
+<div style={{ overflow: 'hidden' }}>
+  <Portal>
+    <div class="popup">Escapes overflow clipping</div>
+  </Portal>
+</div>
+
+<Portal mount={document.querySelector('#portal-root')}>
+  <p>Custom mount node</p>
+</Portal>
+
+{/* SVG: wrap in <g>; head: no wrapper */}
+<Portal mount={svgEl} isSVG>
+  <circle r="4" />
+</Portal>
+```
+
+```js
+const CounterContext = createContext();
+
+function CounterProvider(props) {
+  const [count, setCount] = createSignal(props.count ?? 0);
+  return (
+    <CounterContext.Provider value={[count, setCount]}>
+      {props.children}
+    </CounterContext.Provider>
+  );
+}
+
+function useCounter() {
+  const value = useContext(CounterContext);
+  if (!value) throw new Error('Missing CounterProvider');
+  return value;
+}
+
+function Child() {
+  const [count, setCount] = useCounter();
+  return (
+    <button type="button" onClick={() => setCount((n) => n + 1)}>
+      {count()}
+    </button>
+  );
+}
+```
+
+Pass a signal (or store) as `value` so consumers stay reactive without remounting the Provider.
+
+## Refs
+
+Attach `ref` to any host element to get the DOM node (Solid-compatible):
+
+```js
+// Callback
+<input ref={(el) => { inputEl = el; }} />
+
+// Signal setter (stable function identity)
+const [el, setEl] = createSignal(null);
+<div ref={setEl} />
+
+// Variable form — requires grainJsx() (rewrites to an assignment callback)
+let box;
+<div ref={box} />
+
+// Forwarding
+function Field(props) {
+  return <input ref={props.ref} />;
+}
+<Field ref={setEl} />
+```
+
+Refs are set when the node is created and cleared with `null` when it is removed (e.g. inside `Show`).
 
 ## SSR
 

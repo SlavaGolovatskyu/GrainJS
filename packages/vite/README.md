@@ -2,6 +2,10 @@
 
 Vite plugin for [grainlet](https://www.npmjs.com/package/grainlet) fine-grained JSX.
 
+Wraps reactive JSX expressions as accessors and rewrites Solid-style `ref={ident}`
+(for `let`/`var`) to assignment callbacks. Does not wrap `ref` attributes otherwise
+(so `ref={props.ref}` and `ref={setEl}` keep working).
+
 ## Install (devDependency)
 
 ```bash

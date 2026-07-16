@@ -1,6 +1,6 @@
 {
   "name": "grainlet-vite",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Vite plugin for Grainlet fine-grained JSX transforms",
   "type": "module",
   "license": "MIT",

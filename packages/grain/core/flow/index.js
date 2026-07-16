@@ -3,4 +3,7 @@ export { For } from './For.js';
 export { Switch } from './Switch.js';
 export { Match } from './Match.js';
 export { Suspense } from './Suspense.js';
+export { ErrorBoundary } from './ErrorBoundary.js';
+export { Portal } from './Portal.js';
+export { createContext, useContext } from './createContext.js';
 export { createResource } from './createResource.js';

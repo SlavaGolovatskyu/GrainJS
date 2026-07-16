@@ -9,7 +9,13 @@
  *   {count}              // signal getter already binds
  *   {() => count()}      // already an accessor
  *   onclick={handler}    // events
+ *   ref={...}            // handled separately (see below)
  *   {show() && <div/>}   // control flow with JSX (needs parent re-render for now)
+ *
+ * Refs (Solid-compatible):
+ *   ref={myEl}           →  ref={(el) => { myEl = el; }}
+ *   ref={props.ref}      →  left as-is (do not wrap)
+ *   ref={(el) => ...}    →  left as-is
  */
 
 function containsJSX(path) {
@@ -62,6 +68,31 @@ export default function wrapJsxAccessors({ types: t }) {
     return t.arrowFunctionExpression([], t.parenthesizedExpression(expr));
   }
 
+  /** Solid-style: ref={ident} → ref={(el) => { ident = el; }} for let/var only.
+   *  Leave const bindings (e.g. signal setters) as callable refs. */
+  function transformRefAssignment(exprPath) {
+    const expr = exprPath.node;
+    if (!t.isIdentifier(expr)) return false;
+
+    const binding = exprPath.scope.getBinding(expr.name);
+    if (binding && binding.kind === 'const') {
+      return false;
+    }
+
+    const el = t.identifier('el');
+    exprPath.replaceWith(
+      t.arrowFunctionExpression(
+        [el],
+        t.blockStatement([
+          t.expressionStatement(
+            t.assignmentExpression('=', t.identifier(expr.name), el)
+          ),
+        ])
+      )
+    );
+    return true;
+  }
+
   return {
     name: 'wrap-jsx-accessors',
     visitor: {
@@ -72,7 +103,22 @@ export default function wrapJsxAccessors({ types: t }) {
           const attrName = t.isJSXIdentifier(nameNode)
             ? nameNode.name
             : nameNode?.name;
+
           if (isEventAttrName(attrName)) return;
+
+          // Refs: never wrap; rewrite bare identifiers to assignment callbacks.
+          if (attrName === 'ref') {
+            const exprPath = path.get('expression');
+            if (exprPath.isJSXEmptyExpression()) return;
+            if (
+              t.isArrowFunctionExpression(exprPath.node) ||
+              t.isFunctionExpression(exprPath.node)
+            ) {
+              return;
+            }
+            if (transformRefAssignment(exprPath)) return;
+            return;
+          }
         }
 
         const exprPath = path.get('expression');

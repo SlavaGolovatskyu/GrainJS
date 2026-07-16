@@ -21,6 +21,35 @@ const PREV_PROPS = Symbol('prevProps');
 const TEXT_DISPOSE = Symbol('textDispose');
 const PROP_DISPOSES = Symbol('propDisposes');
 const NODE_KEY = Symbol('nodeKey');
+const REF_KEY = Symbol('ref');
+
+function invokeRef(ref, el) {
+  if (typeof ref === 'function') ref(el);
+}
+
+function applyRef(el, nextRef, prevRef) {
+  if (prevRef === nextRef) return;
+  invokeRef(prevRef, null);
+  invokeRef(nextRef, el);
+  if (nextRef != null) {
+    el[REF_KEY] = nextRef;
+  } else {
+    delete el[REF_KEY];
+  }
+}
+
+function clearRefTree(node) {
+  if (!node || node.nodeType !== Node.ELEMENT_NODE) return;
+  const ref = node[REF_KEY];
+  if (ref != null) {
+    invokeRef(ref, null);
+    delete node[REF_KEY];
+  }
+  const children = node.children;
+  for (let i = 0; i < children.length; i++) {
+    clearRefTree(children[i]);
+  }
+}
 
 function resolveValue(value, owner) {
   if (
@@ -279,6 +308,7 @@ export function applyProps(el, props, owner) {
     setStaticProp(el, key, value);
   }
 
+  applyRef(el, next.ref, prev.ref);
   el[PREV_PROPS] = next;
 }
 
@@ -314,6 +344,7 @@ function removeNode(parentEl, node, owner, path) {
     }
     node[PROP_DISPOSES].clear();
   }
+  clearRefTree(node);
   if (node && node.parentNode === parentEl) {
     parentEl.removeChild(node);
   }
@@ -414,6 +445,7 @@ function replaceNode(parent, oldDom, newDom) {
       }
       oldDom[PROP_DISPOSES].clear();
     }
+    clearRefTree(oldDom);
   }
   if (oldDom && oldDom.parentNode === parent) {
     parent.replaceChild(newDom, oldDom);

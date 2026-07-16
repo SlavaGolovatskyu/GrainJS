@@ -20,6 +20,10 @@ export {
   Switch,
   Match,
   Suspense,
+  ErrorBoundary,
+  Portal,
+  createContext,
+  useContext,
   createResource,
 } from './core/index.js';
 

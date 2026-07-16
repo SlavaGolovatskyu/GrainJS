@@ -9,6 +9,10 @@ export {
   Switch,
   Match,
   Suspense,
+  ErrorBoundary,
+  Portal,
+  createContext,
+  useContext,
   createResource,
 } from './flow/index.js';
 

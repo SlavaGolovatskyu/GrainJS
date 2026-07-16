@@ -6,6 +6,7 @@ import { createEffect } from '../../signals/createEffect/createEffect.js';
 import { componentSignalRegistry } from '../../signals/createSignal/createSignal.js';
 import { jsxCompiler } from '../jsx-compiler/jsx-compiler.js';
 import { createDom, patchDom, adoptDom, unmountDomTree } from '../dom/dom.js';
+import { getErrorBoundary } from '../flow/context.js';
 
 function normalizeRenderResult(result, instance) {
   if (result && typeof result === 'object' && result.html) {
@@ -104,42 +105,53 @@ export function createComponent(ComponentFn) {
           const prev = currentComponent;
           setCurrentComponent(this);
 
-          this._renderCount++;
-          if (componentSignalRegistry.has(this)) {
-            componentSignalRegistry.get(this).index = 0;
-          }
-
-          const isFirstRender = !this._effectsInitialized;
-          let result = this._componentFn(this._props);
-
-          // Keep owner as currentComponent while building DOM so text/prop
-          // bindings can register and track signals without re-running this fn.
-          result = normalizeRenderResult(result, this);
-
-          if (!this._element) {
-            if (this._hydrate) {
-              const existing = parentElement.firstChild;
-              this._element = adoptDom(existing, result, this, '0');
-              this._hydrate = false;
-            } else {
-              this._element = createDom(result, this, '0');
-              parentElement.appendChild(this._element);
+          try {
+            this._renderCount++;
+            if (componentSignalRegistry.has(this)) {
+              componentSignalRegistry.get(this).index = 0;
             }
-          } else {
-            this._element = patchDom(
-              parentElement,
-              this._element,
-              result,
-              this,
-              '0'
-            );
-          }
 
-          if (isFirstRender) {
-            this._effectsInitialized = true;
-          }
+            const isFirstRender = !this._effectsInitialized;
+            let result = this._componentFn(this._props);
 
-          setCurrentComponent(prev);
+            // Keep owner as currentComponent while building DOM so text/prop
+            // bindings can register and track signals without re-running this fn.
+            result = normalizeRenderResult(result, this);
+
+            if (!this._element) {
+              if (this._hydrate) {
+                const existing = parentElement.firstChild;
+                this._element = adoptDom(existing, result, this, '0');
+                this._hydrate = false;
+              } else {
+                this._element = createDom(result, this, '0');
+                parentElement.appendChild(this._element);
+              }
+            } else {
+              this._element = patchDom(
+                parentElement,
+                this._element,
+                result,
+                this,
+                '0'
+              );
+            }
+
+            if (isFirstRender) {
+              this._effectsInitialized = true;
+            }
+          } catch (err) {
+            const boundary = getErrorBoundary();
+            if (boundary) {
+              // Defer so the current mount/patch stack can unwind before fallback remount.
+              queueMicrotask(() => boundary.catch(err));
+              return;
+            }
+            console.error('Uncaught render error:', err);
+            throw err;
+          } finally {
+            setCurrentComponent(prev);
+          }
         };
 
         // createEffect registers on this (currentComponent) and runs immediately
