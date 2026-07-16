@@ -17,3 +17,5 @@ The generated project depends on:
 | `grainlet-vite` | JSX Vite plugin (devDependency) |
 | `vite` | Bundler (devDependency) |
 | `@babel/core`, `@babel/plugin-syntax-jsx` | Peers for the Vite plugin (devDependencies) |
+
+Scaffold includes a `public/` folder for static assets (`styles.css`, `images/`) served at `/`.

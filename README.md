@@ -9,6 +9,7 @@ Workspace root for the **grainlet** library, Vite tooling, scaffolder, and local
 | [`packages/create-grainlet`](packages/create-grainlet) | `npx create-grainlet` project scaffolder |
 | [`apps/examples`](apps/examples) | Framework demos |
 | [`apps/zenwayro`](apps/zenwayro) | Product app on the library |
+| [`apps/github-lookup`](apps/github-lookup) | SPA: look up GitHub users by username |
 | [`apps/ssr-demo`](apps/ssr-demo) | SSR + hydrate demo server |
 
 ## Install (this repo)
@@ -22,6 +23,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 - Routing demo: [/routing](http://localhost:3000/routing)
 - Zenwayro: [/zenwayro](http://localhost:3000/zenwayro)
+- GitHub Lookup: `npm run dev:github-lookup` → [http://localhost:3010](http://localhost:3010)
 - SSR demo: `npm run ssr:demo` → [http://localhost:3001/ssr](http://localhost:3001/ssr)
 
 ## Use the library in another project

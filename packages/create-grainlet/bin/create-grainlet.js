@@ -1,10 +1,34 @@
 #!/usr/bin/env node
-import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, statSync } from 'fs';
-import { dirname, join, resolve } from 'path';
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+  readdirSync,
+  statSync,
+} from 'fs';
+import { dirname, extname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const templateDir = resolve(__dirname, '../template');
+
+const TEXT_EXTENSIONS = new Set([
+  '.js',
+  '.jsx',
+  '.mjs',
+  '.cjs',
+  '.ts',
+  '.tsx',
+  '.json',
+  '.html',
+  '.css',
+  '.md',
+  '.svg',
+  '.txt',
+  '.map',
+]);
 
 function usage() {
   console.log(`Usage: create-grainlet <project-name>
@@ -22,6 +46,10 @@ function isValidName(name) {
   return /^[a-zA-Z0-9._-]+$/.test(name) && name !== '.' && name !== '..';
 }
 
+function isTextFile(filePath) {
+  return TEXT_EXTENSIONS.has(extname(filePath).toLowerCase());
+}
+
 function copyTemplate(src, dest, projectName) {
   mkdirSync(dest, { recursive: true });
   for (const entry of readdirSync(src)) {
@@ -29,6 +57,10 @@ function copyTemplate(src, dest, projectName) {
     const to = join(dest, entry);
     if (statSync(from).isDirectory()) {
       copyTemplate(from, to, projectName);
+      continue;
+    }
+    if (!isTextFile(from)) {
+      cpSync(from, to);
       continue;
     }
     let content = readFileSync(from, 'utf8');

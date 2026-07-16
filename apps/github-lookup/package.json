@@ -1,0 +1,20 @@
+{
+  "name": "github-lookup",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "grainlet": "*"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.0",
+    "@babel/plugin-syntax-jsx": "^7.23.0",
+    "grainlet-vite": "*",
+    "vite": "^5.0.0"
+  }
+}
