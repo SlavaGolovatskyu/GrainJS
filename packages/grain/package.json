@@ -1,20 +1,40 @@
 {
   "name": "grainlet",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Fine-grained signals, JSX, routing, and SSR for the web",
   "type": "module",
   "license": "MIT",
   "main": "./index.js",
+  "types": "./index.d.ts",
   "exports": {
-    ".": "./index.js",
-    "./jsx-runtime": "./core/jsx-compiler-new/jsx-runtime.js",
-    "./jsx-runtime.js": "./core/jsx-compiler-new/jsx-runtime.js",
-    "./jsx-dev-runtime": "./core/jsx-compiler-new/jsx-dev-runtime.js",
-    "./jsx-dev-runtime.js": "./core/jsx-compiler-new/jsx-dev-runtime.js",
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
+    "./jsx-runtime": {
+      "types": "./jsx-runtime.d.ts",
+      "default": "./core/jsx-compiler-new/jsx-runtime.js"
+    },
+    "./jsx-runtime.js": {
+      "types": "./jsx-runtime.d.ts",
+      "default": "./core/jsx-compiler-new/jsx-runtime.js"
+    },
+    "./jsx-dev-runtime": {
+      "types": "./jsx-dev-runtime.d.ts",
+      "default": "./core/jsx-compiler-new/jsx-dev-runtime.js"
+    },
+    "./jsx-dev-runtime.js": {
+      "types": "./jsx-dev-runtime.d.ts",
+      "default": "./core/jsx-compiler-new/jsx-dev-runtime.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
     "index.js",
+    "index.d.ts",
+    "jsx-runtime.d.ts",
+    "jsx-dev-runtime.d.ts",
+    "types",
     "signals",
     "core",
     "route",
@@ -29,6 +49,7 @@
     "jsx",
     "router",
     "ssr",
-    "fine-grained"
+    "fine-grained",
+    "typescript"
   ]
 }

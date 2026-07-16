@@ -177,6 +177,90 @@ function Field(props) {
 
 Refs are set when the node is created and cleared with `null` when it is removed (e.g. inside `Show`).
 
+## TypeScript
+
+Types ship with the package (no extra install). Use the same Vite config with `jsxImportSource: 'grainlet'`:
+
+```ts
+import { createSignal, render, type Accessor } from 'grainlet';
+
+function App() {
+  const [count, setCount] = createSignal(0);
+  return (
+    <button type="button" onClick={() => setCount((c) => c + 1)}>
+      {count()}
+    </button>
+  );
+}
+
+render(App, document.getElementById('app')!);
+```
+
+```json
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "grainlet"
+  }
+}
+```
+
+`grainlet-vite` includes typings for `grainJsx()`.
+
+## Routing
+
+History API router — no hash required:
+
+```js
+import {
+  Router,
+  Route,
+  Link,
+  navigate,
+  useParams,
+  useLocation,
+} from 'grainlet';
+
+function User() {
+  const params = useParams();
+  const location = useLocation();
+  return (
+    <section>
+      <h2>User {params().id}</h2>
+      <p>{location().pathname}</p>
+    </section>
+  );
+}
+
+function App() {
+  return (
+    <>
+      <nav>
+        <Link href="/" activeClass="active">Home</Link>
+        <Link href="/users/1" activeClass="active">User 1</Link>
+      </nav>
+      <Router basename="/app">
+        <Route path="/" component={Home} />
+        <Route path="/users/:id" component={User} />
+        <Route path="*" component={NotFound} />
+      </Router>
+    </>
+  );
+}
+
+// Imperative navigation (respects Router basename)
+navigate('/users/3');
+```
+
+| API | Role |
+|-----|------|
+| `Router` | Match location to `Route` children (optional `basename`) |
+| `Route` | `path` + `component` (`:param`, `*` catch-all) |
+| `Link` | Client-side `<a>`; `activeClass` when the path matches |
+| `navigate(to)` | Push/replace history |
+| `useParams()` | Signal of route params (`params().id`) |
+| `useLocation()` | Signal of `{ pathname, search, hash, state }` |
+
 ## SSR
 
 ```js

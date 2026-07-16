@@ -27,3 +27,5 @@ export default defineConfig({
   },
 });
 ```
+
+Requires peer `vite`. Types for `grainJsx()` ship with the package (no `@types` package).
