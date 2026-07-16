@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>For — keyed re-renders</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 640px;
+      margin: 40px auto;
+      padding: 0 16px;
+      background: #f5f5f5;
+      color: #222;
+    }
+    .demo {
+      background: #fff;
+      padding: 24px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+    .lead { color: #444; line-height: 1.45; }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 16px 0 12px;
+    }
+    button {
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button.warn { background: #fff3cd; border-color: #ffc107; }
+    button.ghost { background: transparent; color: #888; }
+    .list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 10px;
+      border-bottom: 1px solid #eee;
+    }
+    .row.flash-0,
+    .row.flash-1 {
+      animation: flash 0.45s ease;
+    }
+    @keyframes flash {
+      from { background: #d1e7dd; }
+      to { background: transparent; }
+    }
+    .row-main { display: flex; flex-direction: column; gap: 2px; }
+    .value { color: #555; font-size: 13px; }
+    .row-meta { display: flex; align-items: center; gap: 8px; }
+    .badge {
+      font-family: ui-monospace, monospace;
+      font-size: 12px;
+      background: #e9ecef;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    .hint { margin-top: 16px; color: #666; font-size: 13px; line-height: 1.45; }
+    .muted { color: #888; padding: 12px 0; }
+    code { font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <script type="module" src="./14-for-keyed-renders.jsx"></script>
+</body>
+</html>

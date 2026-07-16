@@ -14,7 +14,13 @@ export {
   jsxCompiler, 
   render,
   hydrate,
-  Fragment
+  Fragment,
+  Show,
+  For,
+  Switch,
+  Match,
+  Suspense,
+  createResource,
 } from './core/index.js';
 
 export {

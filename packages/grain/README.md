@@ -54,6 +54,22 @@ export default defineConfig({
 | `grain/jsx-runtime` | Automatic JSX runtime |
 | `grain/vite` | `grainJsx()` Vite plugin |
 
+## Control flow
+
+```js
+import { Show, For, Switch, Match, Suspense, createResource } from 'grain';
+```
+
+| Component | Role |
+|-----------|------|
+| `Show` | Render children when `when` is truthy (else `fallback`) |
+| `For` | Map `each` list to children; prefers `item.id` keys |
+| `Switch` / `Match` | First matching `when` branch |
+| `Suspense` | `fallback` while nested `createResource` is pending |
+| `createResource` | Async data `[resource]` — `resource()` reads value |
+
+Prefer these over `{cond() && <X/>}` so conditionals update without re-running the parent.
+
 ## SSR
 
 ```js

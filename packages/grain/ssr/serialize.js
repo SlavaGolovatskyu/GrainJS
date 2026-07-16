@@ -136,7 +136,16 @@ export function serializeVnode(vdom, renderComponent) {
   }
 
   if (isAccessor(vdom)) {
-    return escapeHtml(toText(resolvePropValue(vdom)));
+    const resolved = resolvePropValue(vdom);
+    if (Array.isArray(resolved)) {
+      return normalizeChildren(resolved)
+        .map((child) => serializeVnode(child, renderComponent))
+        .join('');
+    }
+    if (resolved != null && typeof resolved === 'object' && 'type' in resolved) {
+      return serializeVnode(resolved, renderComponent);
+    }
+    return escapeHtml(toText(resolved));
   }
 
   if (Array.isArray(vdom)) {
@@ -171,14 +180,16 @@ export function serializeVnode(vdom, renderComponent) {
   }
 
   const tag = String(type);
+  const key = vdom.key ?? props?.key;
+  const keyAttr = key != null ? ` data-key="${escapeHtml(key)}"` : '';
   const attrs = serializeAttrs(props);
   if (VOID_TAGS.has(tag)) {
-    return `<${tag}${attrs} />`;
+    return `<${tag}${attrs}${keyAttr} />`;
   }
 
   const inner = normalizeChildren(children)
     .map((child) => serializeVnode(child, renderComponent))
     .join('');
 
-  return `<${tag}${attrs}>${inner}</${tag}>`;
+  return `<${tag}${attrs}${keyAttr}>${inner}</${tag}>`;
 }

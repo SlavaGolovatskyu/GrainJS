@@ -63,7 +63,10 @@ export function createComponent(ComponentFn) {
         const existing = this._children.get(path);
 
         if (existing && existing.factory === factory) {
-          existing.instance.update(childProps);
+          // Same props object (e.g. For row) — skip; item signals drive the row.
+          if (existing.instance._props !== childProps) {
+            existing.instance.update(childProps);
+          }
           return existing.host;
         }
 

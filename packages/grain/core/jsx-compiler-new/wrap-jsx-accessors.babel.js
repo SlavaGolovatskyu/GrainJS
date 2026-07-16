@@ -47,6 +47,14 @@ export default function wrapJsxAccessors({ types: t }) {
     }
     if (t.isJSXElement(expr) || t.isJSXFragment(expr)) return false;
     if (containsJSX(exprPath)) return false;
+    // Structural slot — parent re-render supplies new children; do not text-bind.
+    if (
+      t.isMemberExpression(expr) &&
+      !expr.computed &&
+      t.isIdentifier(expr.property, { name: 'children' })
+    ) {
+      return false;
+    }
     return true;
   }
 
