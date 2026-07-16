@@ -15,6 +15,7 @@ export {
   Fragment,
   Show,
   For,
+  VirtualList,
   Switch,
   Match,
   Suspense,

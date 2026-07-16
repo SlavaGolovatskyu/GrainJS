@@ -28,6 +28,7 @@ export type { JSX, Ref } from './jsx-runtime.js';
 export {
   Show,
   For,
+  VirtualList,
   Switch,
   Match,
   Suspense,
@@ -41,6 +42,7 @@ export {
 export type {
   ShowProps,
   ForProps,
+  VirtualListProps,
   SwitchProps,
   MatchProps,
   SuspenseProps,

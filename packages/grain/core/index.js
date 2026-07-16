@@ -4,6 +4,7 @@ export { render, hydrate } from './render/render.js';
 export {
   Show,
   For,
+  VirtualList,
   Switch,
   Match,
   Suspense,

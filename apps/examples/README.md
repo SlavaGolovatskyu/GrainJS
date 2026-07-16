@@ -69,6 +69,11 @@ Client-side History API routing:
 - `useParams` and `useLocation`
 - 404 catch-all (`*`)
 
+### 19-virtual-list.html
+`VirtualList` with real picsum photos:
+- Vertical / horizontal orientation
+- Per-row `item r` and `img loads` badges to catch remount thrash
+
 ## Running the Examples
 
 1. Open any HTML file in a modern web browser

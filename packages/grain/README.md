@@ -66,6 +66,7 @@ export default defineConfig({
 import {
   Show,
   For,
+  VirtualList,
   Switch,
   Match,
   Suspense,
@@ -81,6 +82,7 @@ import {
 |-----------|------|
 | `Show` | Render children when `when` is truthy (else `fallback`) |
 | `For` | Map `each` list to children; prefers `item.id` keys |
+| `VirtualList` | Windowed list (vertical or horizontal) — only mounts visible items (+ overscan); optional `debounceTime` |
 | `Switch` / `Match` | First matching `when` branch |
 | `Suspense` | `fallback` while nested `createResource` is pending |
 | `ErrorBoundary` | Catch render/update errors; `fallback` or `(error, reset) => …` |
@@ -89,6 +91,23 @@ import {
 | `createResource` | Async data `[resource]` — `resource()` reads value |
 
 Prefer these over `{cond() && <X/>}` so conditionals update without re-running the parent.
+
+```js
+<VirtualList each={items()} itemHeight={48} height={400} overscan={5}>
+  {(item) => <div class="row">{item.label}</div>}
+</VirtualList>
+
+<VirtualList
+  orientation="horizontal"
+  each={items()}
+  itemWidth={120}
+  width={480}
+  height={80}
+  debounceTime={32}
+>
+  {(item) => <div class="card">{item.label}</div>}
+</VirtualList>
+```
 
 ```js
 <ErrorBoundary

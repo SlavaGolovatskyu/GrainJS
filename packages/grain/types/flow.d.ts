@@ -22,6 +22,35 @@ export interface ForProps<T> {
 
 export declare function For<T>(props: ForProps<T>): Child;
 
+export interface VirtualListProps<T> {
+  each: T[] | Accessor<T[] | undefined | null | false>;
+  /** Scroll axis. Default `"vertical"`. */
+  orientation?: 'vertical' | 'horizontal' | Accessor<'vertical' | 'horizontal'>;
+  /** Fixed row height in px (vertical). Also accepted as main-axis fallback for horizontal. */
+  itemHeight?: number | Accessor<number>;
+  /** Fixed item width in px (horizontal). Also accepted as main-axis fallback for vertical. */
+  itemWidth?: number | Accessor<number>;
+  /** Vertical viewport height in px (and optional cross-axis size when horizontal). */
+  height?: number | string | Accessor<number | string | undefined>;
+  /** Horizontal viewport width in px (and optional cross-axis size when vertical). */
+  width?: number | string | Accessor<number | string | undefined>;
+  /** Extra items before/after the viewport. Default 5. */
+  overscan?: number | Accessor<number>;
+  /**
+   * Min ms between scroll-driven window updates (leading + trailing).
+   * `0` (default) applies on every scroll event that changes the index window.
+   */
+  debounceTime?: number | Accessor<number>;
+  keyed?: boolean | ((item: T, index: number) => string | number);
+  fallback?: Child;
+  class?: string;
+  className?: string;
+  style?: string | Record<string, string | number>;
+  children: (item: T, index: number) => Child;
+}
+
+export declare function VirtualList<T>(props: VirtualListProps<T>): Child;
+
 export interface SwitchProps {
   fallback?: Child;
   children?: Child;

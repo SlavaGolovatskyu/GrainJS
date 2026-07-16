@@ -1,5 +1,6 @@
 export { Show } from './Show.js';
 export { For } from './For.js';
+export { VirtualList } from './VirtualList.js';
 export { Switch } from './Switch.js';
 export { Match } from './Match.js';
 export { Suspense } from './Suspense.js';
