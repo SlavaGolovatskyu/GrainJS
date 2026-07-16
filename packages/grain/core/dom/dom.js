@@ -634,8 +634,50 @@ function patchChildren(parentEl, newChildren, owner, path) {
     if (!used.has(node) && node.parentNode === parentEl) {
       const staleKey = getNodeKey(node);
       const stalePath =
-        staleKey != null ? `${path}:${staleKey}` : `${path}.#x`;
+        staleKey != null
+          ? `${path}:${staleKey}`
+          : ownerPathForHost(owner, node) ?? `${path}.#x`;
+      // Unkeyed nodes in a keyed patch used to use a fake `.#x` path, which
+      // skipped owner._children cleanup and left effects/timers running.
+      if (staleKey == null) {
+        clearOwnedHostsUnder(owner, path, node);
+      }
       removeNode(parentEl, node, owner, stalePath);
+    }
+  }
+}
+
+/** Resolve the owner._children path for a direct component host node. */
+function ownerPathForHost(owner, host) {
+  if (!owner?._children || !host) return null;
+  for (const [childPath, entry] of owner._children) {
+    if (entry.host === host) return childPath;
+  }
+  return null;
+}
+
+/**
+ * Unmount component hosts nested under a DOM node when the node's own owner
+ * path is unknown (unkeyed sibling in a keyed patch).
+ */
+function clearOwnedHostsUnder(owner, pathPrefix, node) {
+  if (!owner?._children || !node || node.nodeType !== Node.ELEMENT_NODE) {
+    return;
+  }
+  for (const [childPath, entry] of [...owner._children.entries()]) {
+    if (entry.host === node) continue;
+    if (
+      !(
+        childPath === pathPrefix ||
+        childPath.startsWith(pathPrefix + '.') ||
+        childPath.startsWith(pathPrefix + ':')
+      )
+    ) {
+      continue;
+    }
+    if (entry.host && node.contains(entry.host)) {
+      entry.instance?.unmount();
+      owner._children.delete(childPath);
     }
   }
 }
