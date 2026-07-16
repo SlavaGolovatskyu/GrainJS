@@ -74,6 +74,11 @@ Client-side History API routing:
 - Vertical / horizontal orientation
 - Per-row `item r` and `img loads` badges to catch remount thrash
 
+### 20-virtual-infinite.html
+Infinite scroll on `VirtualList`:
+- `onEndReached` + simulated paged API
+- Appends picsum photos until `hasMore` is false
+
 ## Running the Examples
 
 1. Open any HTML file in a modern web browser

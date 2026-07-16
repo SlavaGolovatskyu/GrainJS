@@ -195,13 +195,47 @@ function applyScrollOffset(bag, setScrollOffset, scroll) {
   setScrollOffset(scroll);
 }
 
+function maybeFireEndReached(bag, el) {
+  if (typeof bag.onEndReached !== 'function' || !el) return;
+  if (bag.endReachedLoading) return;
+
+  const remaining = bag.horizontal
+    ? el.scrollWidth - el.scrollLeft - el.clientWidth
+    : el.scrollHeight - el.scrollTop - el.clientHeight;
+  const viewport = bag.horizontal ? el.clientWidth : el.clientHeight;
+  const thresholdPx = Math.max(0, viewport * bag.endReachedThreshold);
+  const nearEnd = remaining <= thresholdPx;
+
+  if (!nearEnd) {
+    bag.endReachedArmed = true;
+    return;
+  }
+  if (!bag.endReachedArmed) return;
+
+  bag.endReachedArmed = false;
+  try {
+    bag.onEndReached();
+  } catch (err) {
+    console.error('VirtualList onEndReached error:', err);
+  }
+}
+
 /** Leading + trailing throttle so the window still tracks during fast flings. */
-function scheduleScrollApply(bag, setScrollOffset, scroll) {
+function scheduleScrollApply(bag, setScrollOffset, scroll, el) {
   bag.pendingScroll = scroll;
+  bag.pendingScrollEl = el || bag.el;
   bag.setScrollOffset = setScrollOffset;
   const wait = bag.debounceTime | 0;
+
+  const run = () => {
+    applyScrollOffset(bag, bag.setScrollOffset, bag.pendingScroll);
+    maybeFireEndReached(bag, bag.pendingScrollEl || bag.el);
+  };
+
   if (wait <= 0) {
+    bag.pendingScroll = scroll;
     applyScrollOffset(bag, setScrollOffset, scroll);
+    maybeFireEndReached(bag, el || bag.el);
     return;
   }
 
@@ -213,7 +247,7 @@ function scheduleScrollApply(bag, setScrollOffset, scroll) {
       clearTimeout(bag.scrollTimer);
       bag.scrollTimer = null;
     }
-    applyScrollOffset(bag, setScrollOffset, scroll);
+    run();
     return;
   }
 
@@ -221,7 +255,7 @@ function scheduleScrollApply(bag, setScrollOffset, scroll) {
     bag.scrollTimer = setTimeout(() => {
       bag.scrollTimer = null;
       bag.lastScrollApply = Date.now();
-      applyScrollOffset(bag, bag.setScrollOffset, bag.pendingScroll);
+      run();
     }, wait - elapsed);
   }
 }
@@ -234,7 +268,13 @@ function scheduleScrollApply(bag, setScrollOffset, scroll) {
  *     {(item) => <div>{item.label}</div>}
  *   </VirtualList>
  *
- *   <VirtualList orientation="horizontal" each={items()} itemWidth={120} width={480} height={80}>
+ *   <VirtualList
+ *     each={items()}
+ *     itemHeight={48}
+ *     height={400}
+ *     onEndReached={loadMore}
+ *     endReachedLoading={loading()}
+ *   >
  *     {(item) => <div>{item.label}</div>}
  *   </VirtualList>
  */
@@ -252,10 +292,17 @@ export function VirtualList(props) {
     horizontal: false,
     debounceTime: 0,
     pendingScroll: 0,
+    pendingScrollEl: null,
     lastScrollApply: 0,
     scrollTimer: null,
     setScrollOffset: null,
     onScroll: null,
+    onEndReached: null,
+    endReachedThreshold: 0.2,
+    endReachedLoading: false,
+    endReachedArmed: true,
+    lastCount: 0,
+    wasEndReachedLoading: false,
   });
   const bag = getBag();
 
@@ -307,10 +354,17 @@ export function VirtualList(props) {
   }
   const overscan = Number(readProp(props.overscan) ?? 5);
   const debounceTime = Math.max(0, Number(readProp(props.debounceTime) ?? 0) || 0);
+  const endReachedThreshold = Math.min(
+    1,
+    Math.max(0, Number(readProp(props.endReachedThreshold) ?? 0.2) || 0)
+  );
+  const endReachedLoading = !!readProp(props.endReachedLoading);
   const heightProp = readProp(props.height);
   const widthProp = readProp(props.width);
   const keyed = resolveKeyed(props.keyed);
   const render = props.children;
+  const onEndReached =
+    typeof props.onEndReached === 'function' ? props.onEndReached : null;
 
   const viewportProp = horizontal ? widthProp : heightProp;
   const viewportSize =
@@ -318,12 +372,25 @@ export function VirtualList(props) {
       ? Number(viewportProp) || 0
       : measuredMain();
 
+  // Re-arm after more items arrive or a fetch finishes so the next page can load.
+  if (count > bag.lastCount) {
+    bag.endReachedArmed = true;
+  }
+  if (bag.wasEndReachedLoading && !endReachedLoading) {
+    bag.endReachedArmed = true;
+  }
+  bag.lastCount = count;
+  bag.wasEndReachedLoading = endReachedLoading;
+
   bag.itemSize = itemSize;
   bag.overscan = overscan;
   bag.count = count;
   bag.viewportSize = viewportSize;
   bag.debounceTime = debounceTime;
   bag.setScrollOffset = setScrollOffset;
+  bag.onEndReached = onEndReached;
+  bag.endReachedThreshold = endReachedThreshold;
+  bag.endReachedLoading = endReachedLoading;
 
   let range;
   if (isServer()) {
@@ -373,6 +440,10 @@ export function VirtualList(props) {
         bag.ro.observe(el);
       }
     }
+    // Short lists that already fit the viewport should still be able to page.
+    if (onEndReached) {
+      queueMicrotask(() => maybeFireEndReached(bag, bag.el));
+    }
   };
 
   const scrollerProps = {
@@ -385,12 +456,12 @@ export function VirtualList(props) {
 
   if (!isServer()) {
     // Native scroll moves pixels; only rebuild when the index window changes.
-    // debounceTime throttles how often we evaluate/apply that window update.
+    // debounceTime throttles window updates and end-reached checks together.
     if (!bag.onScroll) {
       bag.onScroll = (event) => {
         const target = event.currentTarget;
         const scroll = bag.horizontal ? target.scrollLeft : target.scrollTop;
-        scheduleScrollApply(bag, bag.setScrollOffset, scroll);
+        scheduleScrollApply(bag, bag.setScrollOffset, scroll, target);
       };
     }
     scrollerProps.onScroll = bag.onScroll;

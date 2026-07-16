@@ -82,7 +82,7 @@ import {
 |-----------|------|
 | `Show` | Render children when `when` is truthy (else `fallback`) |
 | `For` | Map `each` list to children; prefers `item.id` keys |
-| `VirtualList` | Windowed list (vertical or horizontal) — only mounts visible items (+ overscan); optional `debounceTime` |
+| `VirtualList` | Windowed list (vertical or horizontal) — overscan, optional `debounceTime`, infinite scroll via `onEndReached` |
 | `Switch` / `Match` | First matching `when` branch |
 | `Suspense` | `fallback` while nested `createResource` is pending |
 | `ErrorBoundary` | Catch render/update errors; `fallback` or `(error, reset) => …` |
@@ -106,6 +106,31 @@ Prefer these over `{cond() && <X/>}` so conditionals update without re-running t
   debounceTime={32}
 >
   {(item) => <div class="card">{item.label}</div>}
+</VirtualList>
+
+// Infinite scroll — parent owns fetch + append
+const [page, setPage] = createSignal([]);
+const [loading, setLoading] = createSignal(false);
+const [hasMore, setHasMore] = createSignal(true);
+
+async function loadMore() {
+  if (loading() || !hasMore()) return;
+  setLoading(true);
+  const next = await fetchPage(page().length);
+  setPage((list) => [...list, ...next.items]);
+  setHasMore(next.hasMore);
+  setLoading(false);
+}
+
+<VirtualList
+  each={page()}
+  itemHeight={88}
+  height={520}
+  onEndReached={loadMore}
+  endReachedThreshold={0.2}
+  endReachedLoading={loading()}
+>
+  {(item) => <div class="row">{item.label}</div>}
 </VirtualList>
 ```
 

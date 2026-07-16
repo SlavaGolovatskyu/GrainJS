@@ -286,11 +286,167 @@ async function testDebounceTimeThrottlesWindowUpdates() {
   root.remove();
 }
 
+function mockScrollerMetrics(scroller, { clientHeight, scrollHeight, scrollTop }) {
+  Object.defineProperty(scroller, 'clientHeight', {
+    configurable: true,
+    get: () => clientHeight,
+  });
+  Object.defineProperty(scroller, 'scrollHeight', {
+    configurable: true,
+    get: () => scrollHeight,
+  });
+  scroller.scrollTop = scrollTop;
+}
+
+async function testEndReachedFiresOnceNearBottom() {
+  let calls = 0;
+  const items = Array.from({ length: 50 }, (_, i) => ({ id: i }));
+  const App = createComponent(() =>
+    jsx(VirtualList, {
+      each: items,
+      itemHeight: 20,
+      height: 100,
+      overscan: 1,
+      endReachedThreshold: 0.2,
+      onEndReached: () => {
+        calls += 1;
+      },
+      children: (item) => jsx('span', null, String(item.id)),
+    })
+  );
+
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  render(App, root);
+  await flush();
+  await flush(); // microtask from bindScroller
+
+  const scroller = root.querySelector('[data-grainlet-virtual-list]');
+  // remaining = 1000 - 880 - 100 = 20; threshold = 0.2 * 100 = 20 → near end
+  mockScrollerMetrics(scroller, {
+    clientHeight: 100,
+    scrollHeight: 1000,
+    scrollTop: 880,
+  });
+  scroller.dispatchEvent(new dom.window.Event('scroll', { bubbles: true }));
+  await flush();
+
+  if (calls !== 1) {
+    throw new Error(`expected onEndReached once, got ${calls}`);
+  }
+
+  scroller.scrollTop = 900;
+  scroller.dispatchEvent(new dom.window.Event('scroll', { bubbles: true }));
+  await flush();
+  if (calls !== 1) {
+    throw new Error(`expected still one call while armed=false, got ${calls}`);
+  }
+  root.remove();
+}
+
+async function testEndReachedBlockedWhileLoading() {
+  let calls = 0;
+  const items = Array.from({ length: 50 }, (_, i) => ({ id: i }));
+  const App = createComponent(() =>
+    jsx(VirtualList, {
+      each: items,
+      itemHeight: 20,
+      height: 100,
+      endReachedThreshold: 0.2,
+      endReachedLoading: true,
+      onEndReached: () => {
+        calls += 1;
+      },
+      children: (item) => jsx('span', null, String(item.id)),
+    })
+  );
+
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  render(App, root);
+  await flush();
+  await flush();
+
+  const scroller = root.querySelector('[data-grainlet-virtual-list]');
+  mockScrollerMetrics(scroller, {
+    clientHeight: 100,
+    scrollHeight: 1000,
+    scrollTop: 900,
+  });
+  scroller.dispatchEvent(new dom.window.Event('scroll', { bubbles: true }));
+  await flush();
+
+  if (calls !== 0) {
+    throw new Error(`expected no onEndReached while loading, got ${calls}`);
+  }
+  root.remove();
+}
+
+async function testEndReachedRearmsAfterGrow() {
+  let calls = 0;
+  const [items, setItems] = createSignal(
+    Array.from({ length: 40 }, (_, i) => ({ id: i }))
+  );
+
+  const App = createComponent(() =>
+    jsx(VirtualList, {
+      each: items(),
+      itemHeight: 20,
+      height: 100,
+      endReachedThreshold: 0.2,
+      onEndReached: () => {
+        calls += 1;
+      },
+      children: (item) => jsx('span', null, String(item.id)),
+    })
+  );
+
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  render(App, root);
+  await flush();
+  await flush();
+
+  const scroller = root.querySelector('[data-grainlet-virtual-list]');
+  mockScrollerMetrics(scroller, {
+    clientHeight: 100,
+    scrollHeight: 800,
+    scrollTop: 700,
+  });
+  scroller.dispatchEvent(new dom.window.Event('scroll', { bubbles: true }));
+  await flush();
+  if (calls !== 1) {
+    throw new Error(`expected first onEndReached, got ${calls}`);
+  }
+
+  setItems((list) => [
+    ...list,
+    ...Array.from({ length: 20 }, (_, i) => ({ id: list.length + i })),
+  ]);
+  await flush();
+
+  mockScrollerMetrics(scroller, {
+    clientHeight: 100,
+    scrollHeight: 1200,
+    scrollTop: 1100,
+  });
+  scroller.dispatchEvent(new dom.window.Event('scroll', { bubbles: true }));
+  await flush();
+
+  if (calls !== 2) {
+    throw new Error(`expected re-armed onEndReached after grow, got ${calls}`);
+  }
+  root.remove();
+}
+
 await testEmptyFallback();
 await testWindowedMountCount();
 await testScrollShiftsWindow();
 await testIntraRangeScrollDoesNotRemount();
 await testDebounceTimeThrottlesWindowUpdates();
+await testEndReachedFiresOnceNearBottom();
+await testEndReachedBlockedWhileLoading();
+await testEndReachedRearmsAfterGrow();
 await testHorizontalScrollShiftsWindow();
 console.log('virtual-list tests passed');
 process.exit(0);

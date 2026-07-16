@@ -41,6 +41,15 @@ export interface VirtualListProps<T> {
    * `0` (default) applies on every scroll event that changes the index window.
    */
   debounceTime?: number | Accessor<number>;
+  /** Called once when scroll crosses near the trailing edge (infinite scroll). */
+  onEndReached?: () => void;
+  /**
+   * Fraction of viewport size from the end that triggers `onEndReached`.
+   * Default `0.2`.
+   */
+  endReachedThreshold?: number | Accessor<number>;
+  /** When true, `onEndReached` will not fire (block while a fetch is in flight). */
+  endReachedLoading?: boolean | Accessor<boolean>;
   keyed?: boolean | ((item: T, index: number) => string | number);
   fallback?: Child;
   class?: string;
