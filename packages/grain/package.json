@@ -42,6 +42,12 @@
     "README.md"
   ],
   "sideEffects": false,
+  "scripts": {
+    "test": "node test/keyed-unmount.test.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^26.1.0"
+  },
   "keywords": [
     "grainlet",
     "grain",
