@@ -8,7 +8,6 @@ This directory contains various examples demonstrating how to use the reactive s
 Basic counter example showing:
 - Using `createSignal` to manage state
 - Plain PascalCase component functions (auto-wrapped by `render` / JSX)
-- Using `html` template literals
 - Using `render` to mount components
 
 ### 02-todo-list.html
@@ -97,5 +96,5 @@ Then navigate to `http://localhost:3000/apps/examples/01-basic-counter.html`
 - **Cleanup**: Automatic resource cleanup with `onCleanup`
 - **Components**: Reusable UI as plain PascalCase functions (`render` / JSX auto-wrap)
 - **Rendering**: Mounting components with `render`
-- **Templates**: HTML template literals with the `html` helper
+- **JSX**: Write UI with JSX via Vite + `grainlet-vite`
 

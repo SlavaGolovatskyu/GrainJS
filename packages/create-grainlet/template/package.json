@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "grainlet": "^1.0.1"
+    "grainlet": "^1.0.6"
   },
   "devDependencies": {
     "@babel/core": "^7.23.0",

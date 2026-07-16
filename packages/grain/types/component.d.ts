@@ -32,19 +32,11 @@ export declare function hydrate(
   props?: Record<string, unknown>
 ): ComponentInstance;
 
-/** Tagged-template HTML helper (legacy). */
-export declare function html(
-  strings: TemplateStringsArray,
-  ...values: unknown[]
-): JSX.Element;
-
 /** Classic / low-level JSX factory. */
 export declare function jsx(
   type: string | Component,
   props?: Record<string, unknown> | null,
   ...children: unknown[]
 ): JSX.Element;
-
-export declare function jsxCompiler(source: string): unknown;
 
 export type { Accessor, JSX };

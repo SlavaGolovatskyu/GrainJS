@@ -51,18 +51,6 @@ function clearRefTree(node) {
   }
 }
 
-function resolveValue(value, owner) {
-  if (
-    typeof value === 'string' &&
-    value.startsWith('__func_') &&
-    value.endsWith('__') &&
-    owner?._currentFunctions?.has(value)
-  ) {
-    return owner._currentFunctions.get(value);
-  }
-  return value;
-}
-
 function eventName(key) {
   if (key === 'onClick' || key === 'onclick') return 'click';
   if (key.startsWith('on') && key.length > 2) {
@@ -285,7 +273,7 @@ export function applyProps(el, props, owner) {
   for (const key of Object.keys(next)) {
     if (key === 'children' || key === 'key' || key === 'ref') continue;
 
-    let value = resolveValue(next[key], owner);
+    let value = next[key];
     const ev = eventName(key);
 
     if (ev) {

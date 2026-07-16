@@ -9,12 +9,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "grainlet": "*"
+    "grainlet": "1.0.6"
   },
   "devDependencies": {
     "@babel/core": "^7.23.0",
     "@babel/plugin-syntax-jsx": "^7.23.0",
-    "grainlet-vite": "*",
+    "grainlet-vite": "1.0.2",
     "vite": "^5.0.0"
   }
 }

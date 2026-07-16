@@ -4,24 +4,8 @@ import {
 } from '../../signals/reactive-context/reactive-context.js';
 import { createEffect } from '../../signals/createEffect/createEffect.js';
 import { componentSignalRegistry } from '../../signals/createSignal/createSignal.js';
-import { jsxCompiler } from '../jsx-compiler/jsx-compiler.js';
 import { createDom, patchDom, adoptDom, unmountDomTree } from '../dom/dom.js';
 import { getErrorBoundary } from '../flow/context.js';
-
-function normalizeRenderResult(result, instance) {
-  if (result && typeof result === 'object' && result.html) {
-    instance._currentFunctions = result.functions || null;
-    return jsxCompiler.compile(result.html);
-  }
-
-  if (typeof result === 'string') {
-    instance._currentFunctions = null;
-    return jsxCompiler.compile(result);
-  }
-
-  instance._currentFunctions = null;
-  return result;
-}
 
 export function createComponent(ComponentFn) {
   function Component(props = {}) {
@@ -37,7 +21,6 @@ export function createComponent(ComponentFn) {
       _effectsInitialized: false,
       _children: new Map(),
       _renderEffect: null,
-      _currentFunctions: null,
       _bindings: [],
       _hydrate: false,
 
@@ -112,12 +95,10 @@ export function createComponent(ComponentFn) {
             }
 
             const isFirstRender = !this._effectsInitialized;
-            let result = this._componentFn(this._props);
+            const result = this._componentFn(this._props);
 
             // Keep owner as currentComponent while building DOM so text/prop
             // bindings can register and track signals without re-running this fn.
-            result = normalizeRenderResult(result, this);
-
             if (!this._element) {
               if (this._hydrate) {
                 const existing = parentElement.firstChild;

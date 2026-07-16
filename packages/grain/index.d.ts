@@ -11,9 +11,7 @@ export type { Accessor, Setter, Signal } from './types/signals.js';
 
 export {
   createComponent,
-  html,
   jsx,
-  jsxCompiler,
   render,
   hydrate,
 } from './types/component.js';

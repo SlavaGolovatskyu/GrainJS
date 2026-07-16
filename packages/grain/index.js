@@ -9,9 +9,7 @@ export {
 
 export { 
   createComponent, 
-  html, 
   jsx, 
-  jsxCompiler, 
   render,
   hydrate,
   Fragment,
