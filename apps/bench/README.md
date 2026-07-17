@@ -1,5 +1,7 @@
 # Framework compare benchmarks
 
+<img width="1053" height="852" alt="image" src="https://github.com/user-attachments/assets/f1e889c1-631a-4da3-945d-a70a1cfb23a4" />
+
 Local harness comparing **Grainlet**, **React**, **Preact**, and **Solid** on classic keyed-list scenarios (inspired by [js-framework-benchmark](https://github.com/krausest/js-framework-benchmark), but **not** an official ranking).
 
 ## Scenarios
