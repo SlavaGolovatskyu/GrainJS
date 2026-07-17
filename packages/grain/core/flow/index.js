@@ -8,3 +8,4 @@ export { ErrorBoundary } from './ErrorBoundary.js';
 export { Portal } from './Portal.js';
 export { createContext, useContext } from './createContext.js';
 export { createResource } from './createResource.js';
+export { lazy } from './lazy.js';

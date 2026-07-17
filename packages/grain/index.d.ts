@@ -37,6 +37,7 @@ export {
   createContext,
   useContext,
   createResource,
+  lazy,
 } from './types/flow.js';
 
 export type {
@@ -52,33 +53,3 @@ export type {
   Resource,
   ResourceState,
 } from './types/flow.js';
-
-export {
-  Router,
-  Route,
-  Link,
-  navigate,
-  setNavigateBasename,
-  getNavigateBasename,
-  useLocation,
-  useParams,
-  matchPath,
-  matchRoutes,
-} from './types/route.js';
-
-export type {
-  Location,
-  NavigateOptions,
-  RouteProps,
-  RouterProps,
-  RouteDescriptor,
-  LinkProps,
-  PathMatch,
-} from './types/route.js';
-
-export {
-  renderToString,
-  wrapHtmlDocument,
-  runWithSSR,
-  getSSRContext,
-} from './types/ssr.js';

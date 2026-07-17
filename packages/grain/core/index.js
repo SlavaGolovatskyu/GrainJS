@@ -13,5 +13,6 @@ export {
   createContext,
   useContext,
   createResource,
+  lazy,
 } from './flow/index.js';
 

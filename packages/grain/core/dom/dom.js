@@ -1,20 +1,13 @@
-import { Fragment } from '../jsx-compiler-new/jsx-runtime.js';
 import { createBindingEffect } from '../../signals/createEffect/createEffect.js';
-
-const BOOLEAN_ATTRS = new Set([
-  'disabled',
-  'checked',
-  'selected',
-  'readonly',
-  'required',
-  'multiple',
-  'hidden',
-  'autofocus',
-  'controls',
-  'loop',
-  'muted',
-  'open',
-]);
+import {
+  BOOLEAN_ATTRS,
+  isFragmentType,
+  isComponentType,
+  isAccessor,
+  toText,
+  normalizeChildren,
+  vnodeKey,
+} from '../shared/vnode.js';
 
 const LISTENERS = Symbol('listeners');
 const PREV_PROPS = Symbol('prevProps');
@@ -57,23 +50,6 @@ function eventName(key) {
     return key.slice(2).toLowerCase();
   }
   return null;
-}
-
-function isFragmentType(type) {
-  return type === Fragment;
-}
-
-function isComponentType(type) {
-  return typeof type === 'function' && !isFragmentType(type);
-}
-
-function isAccessor(value) {
-  return typeof value === 'function';
-}
-
-function toText(value) {
-  if (value == null || value === false || value === true) return '';
-  return String(value);
 }
 
 /** Accessor results that should render as DOM, not String(value). */
@@ -225,12 +201,6 @@ function bindProp(el, key, accessor) {
   );
 }
 
-function normalizeChildren(children) {
-  if (children == null || children === false) return [];
-  const list = Array.isArray(children) ? children.flat(Infinity) : [children];
-  return list.filter((child) => child !== null && child !== undefined && child !== false);
-}
-
 function componentProps(vdom) {
   const base = vdom.props || {};
   const kids = normalizeChildren(vdom.children);
@@ -339,9 +309,7 @@ function removeNode(parentEl, node, owner, path) {
 }
 
 function getVdomKey(vdom) {
-  if (vdom == null || typeof vdom !== 'object') return undefined;
-  if (vdom.key != null) return vdom.key;
-  return vdom.props?.key;
+  return vnodeKey(vdom);
 }
 
 function setNodeKey(node, key) {

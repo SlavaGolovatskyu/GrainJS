@@ -2,58 +2,14 @@ import { createSignal } from '../../signals/index.js';
 import { isServer } from '../../signals/env.js';
 import {
   currentComponent,
-  setCurrentComponent,
 } from '../../signals/reactive-context/reactive-context.js';
 import { jsx } from '../jsx-compiler-new/jsx-runtime.js';
 import { readProp } from './resolve.js';
-
-function defaultKeyOf(item, index) {
-  if (item == null) return index;
-  if (
-    typeof item === 'string' ||
-    typeof item === 'number' ||
-    typeof item === 'boolean'
-  ) {
-    return item;
-  }
-  if (typeof item === 'object') {
-    if (item.id != null) return item.id;
-    if (item.key != null) return item.key;
-  }
-  return index;
-}
-
-function VirtualRow(props) {
-  const render = props.render;
-  if (typeof render !== 'function') {
-    return render;
-  }
-  const item = props.getItem();
-  if (render.length > 1) {
-    return render(item, props.getIndex());
-  }
-  return render(item);
-}
-
-function createRow(item, index, render) {
-  const prev = currentComponent;
-  setCurrentComponent(null);
-
-  const [getItem, setItem] = createSignal(item);
-  const [getIndex, setIndex] = createSignal(index);
-  const rowProps = { getItem, getIndex, render };
-  const vnode = { type: VirtualRow, props: rowProps, children: undefined };
-
-  setCurrentComponent(prev);
-
-  return { setItem, setIndex, props: rowProps, vnode };
-}
-
-function resolveKeyed(keyedProp) {
-  if (typeof keyedProp === 'function') return keyedProp;
-  if (keyedProp === false) return (_item, index) => index;
-  return defaultKeyOf;
-}
+import {
+  resolveKeyed,
+  normalizeEach,
+  syncKeyedRows,
+} from './keyed-list.js';
 
 function resolveOrientation(value) {
   const raw = readProp(value);
@@ -62,54 +18,26 @@ function resolveOrientation(value) {
 }
 
 function buildRows(bag, items, start, end, keyed, render, horizontal) {
-  const seen = new Set();
-  const out = [];
   const mainSize = bag.itemSize;
 
-  for (let index = start; index < end; index++) {
-    const item = items[index];
-    const key = keyed(item, index);
-    seen.add(key);
+  return syncKeyedRows(bag, items, keyed, render, {
+    start,
+    end,
+    mapRow(row, index) {
+      const key = row.vnode.key;
+      const slotStyle = horizontal
+        ? {
+            width: `${mainSize}px`,
+            flex: `0 0 ${mainSize}px`,
+            height: '100%',
+            boxSizing: 'border-box',
+          }
+        : {
+            height: `${mainSize}px`,
+            boxSizing: 'border-box',
+          };
 
-    let row = bag.rows.get(key);
-    if (!row) {
-      row = createRow(item, index, render);
-      bag.rows.set(key, row);
-    } else {
-      // Avoid notifying row effects when the window only slides over the same item.
-      if (!Object.is(row.props.getItem(), item)) {
-        row.setItem(item);
-      }
-      if (!Object.is(row.props.getIndex(), index)) {
-        row.setIndex(index);
-      }
-      if (row.props.render !== render) {
-        row.props = {
-          getItem: row.props.getItem,
-          getIndex: row.props.getIndex,
-          render,
-        };
-        row.vnode.props = row.props;
-      }
-    }
-
-    row.vnode.key = key;
-    row.props.key = key;
-
-    const slotStyle = horizontal
-      ? {
-          width: `${mainSize}px`,
-          flex: `0 0 ${mainSize}px`,
-          height: '100%',
-          boxSizing: 'border-box',
-        }
-      : {
-          height: `${mainSize}px`,
-          boxSizing: 'border-box',
-        };
-
-    out.push(
-      jsx(
+      return jsx(
         'div',
         {
           key,
@@ -117,17 +45,9 @@ function buildRows(bag, items, start, end, keyed, render, horizontal) {
           style: slotStyle,
         },
         row.vnode
-      )
-    );
-  }
-
-  for (const key of [...bag.rows.keys()]) {
-    if (!seen.has(key)) {
-      bag.rows.delete(key);
-    }
-  }
-
-  return out;
+      );
+    },
+  });
 }
 
 function cssSize(value) {
@@ -330,7 +250,7 @@ export function VirtualList(props) {
   }
 
   const list = readProp(props.each);
-  const items = Array.isArray(list) ? list : list == null ? [] : [list];
+  const items = normalizeEach(list);
   const count = items.length;
 
   if (count === 0) {

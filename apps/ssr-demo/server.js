@@ -3,6 +3,7 @@
  *
  *   npm run ssr:demo
  *   open http://localhost:3001/ssr
+ *   open http://localhost:3001/ssr/async  (lazy + createResource)
  */
 import http from 'node:http';
 import { createServer as createViteServer } from 'vite';
@@ -26,20 +27,34 @@ const vite = await createViteServer({
 });
 
 async function renderPage(url) {
-  const { renderToString, wrapHtmlDocument } = await vite.ssrLoadModule('grainlet');
-  const { CounterApp } = await vite.ssrLoadModule('/apps/ssr-demo/CounterApp.jsx');
+  const { renderToString, renderToStringAsync, wrapHtmlDocument } =
+    await vite.ssrLoadModule('grainlet/ssr');
+  const path = new URL(url, 'http://localhost').pathname;
 
-  const body = renderToString(CounterApp, {}, { url });
+  const isAsync = path === '/ssr/async' || path === '/ssr/async/';
+  const mod = isAsync
+    ? await vite.ssrLoadModule('/apps/ssr-demo/AsyncApp.jsx')
+    : await vite.ssrLoadModule('/apps/ssr-demo/CounterApp.jsx');
+  const App = isAsync ? mod.AsyncApp : mod.CounterApp;
+  const clientScript = isAsync
+    ? '/apps/ssr-demo/async-client.js'
+    : '/apps/ssr-demo/client.js';
+
+  const body = isAsync
+    ? await renderToStringAsync(App, {}, { url })
+    : renderToString(App, {}, { url });
+
   return wrapHtmlDocument(body, {
-    title: 'SSR demo',
+    title: isAsync ? 'SSR async demo' : 'SSR demo',
     head: `<style>
       body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 2rem auto; padding: 0 1rem; }
       .count { font-size: 2rem; }
       .badge { display: inline-block; margin: 0.5rem 0; padding: 0.2rem 0.5rem; background: #eee; border-radius: 4px; }
       .actions button { margin-right: 0.5rem; padding: 0.4rem 0.8rem; }
       .hint { color: #666; font-size: 0.9rem; }
+      .fallback { color: #999; font-style: italic; }
     </style>`,
-    scripts: ['/apps/ssr-demo/client.js'],
+    scripts: [clientScript],
   });
 }
 
@@ -48,7 +63,13 @@ const server = http.createServer(async (req, res) => {
     const url = req.url || '/';
     const path = url.split('?')[0];
 
-    if (path === '/ssr' || path === '/ssr/' || path === '/') {
+    if (
+      path === '/ssr' ||
+      path === '/ssr/' ||
+      path === '/' ||
+      path === '/ssr/async' ||
+      path === '/ssr/async/'
+    ) {
       const html = await renderPage(`http://localhost:${port}${url}`);
       const transformed = await vite.transformIndexHtml(url, html);
       res.statusCode = 200;
@@ -71,4 +92,5 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(port, () => {
   console.log(`SSR demo at http://localhost:${port}/ssr`);
+  console.log(`SSR async at http://localhost:${port}/ssr/async`);
 });

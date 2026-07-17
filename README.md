@@ -4,7 +4,7 @@ Workspace root for the **grainlet** library, Vite tooling, scaffolder, and local
 
 | Path | Role |
 |------|------|
-| [`packages/grain`](packages/grain) | Runtime npm package `grainlet` (signals, JSX runtime, route, SSR) |
+| [`packages/grain`](packages/grain) | Runtime npm package `grainlet` (core + `grainlet/route` + `grainlet/ssr`) |
 | [`packages/vite`](packages/vite) | Dev package `grainlet-vite` (Vite JSX plugin) |
 | [`packages/create-grainlet`](packages/create-grainlet) | `npx create-grainlet` project scaffolder |
 | [`apps/examples`](apps/examples) | Framework demos |
@@ -90,8 +90,8 @@ npm run pack:create   # create-grainlet
 - Reactive signals with automatic dependency tracking
 - Fine-grained DOM updates via JSX accessors
 - Nestable `createEffect` / `onCleanup`
-- History API routing (`Router`, `Route`, `Link`)
-- SSR via `renderToString` + client `hydrate`
+- History API routing via `grainlet/route` (`Router`, `Route`, `Link`)
+- SSR via `grainlet/ssr` (`renderToString`) + client `hydrate` from `grainlet`
 
 ## License
 

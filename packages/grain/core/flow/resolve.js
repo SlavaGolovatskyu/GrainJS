@@ -1,4 +1,5 @@
 import { Fragment } from '../jsx-compiler-new/jsx-runtime.js';
+import { vnodeKey } from '../shared/vnode.js';
 
 export function asArray(value) {
   if (value == null || value === false) return [];
@@ -41,19 +42,4 @@ export function flattenFlowChildren(children) {
   return out;
 }
 
-export function vnodeKey(vdom) {
-  if (vdom == null || typeof vdom !== 'object') return undefined;
-  if (vdom.key != null) return vdom.key;
-  return vdom.props?.key;
-}
-
-export function withKey(vdom, key) {
-  if (vdom == null || typeof vdom !== 'object' || Array.isArray(vdom)) {
-    return vdom;
-  }
-  return {
-    ...vdom,
-    key,
-    props: { ...(vdom.props || {}), key },
-  };
-}
+export { vnodeKey };

@@ -4,10 +4,11 @@ import {
   pushSuspenseContext,
   popSuspenseContext,
 } from './context.js';
+import { trackSSRThenables } from '../../ssr/context.js';
 
 /**
- * Show fallback while any createResource under children is pending.
- * Children stay mounted (hidden) so in-flight resources keep running.
+ * Show fallback while any createResource / lazy under children is pending.
+ * Children stay mounted (hidden) so in-flight work keeps running.
  *
  *   <Suspense fallback={<div class="loader">Loading...</div>}>
  *     <Child />
@@ -17,25 +18,58 @@ export function Suspense(props) {
   const [showFallback, setShowFallback] = createSignal(false);
   const pending = new Set();
 
-  const ctx = {
-    track(resource) {
-      pending.add(resource);
-      setShowFallback(true);
-    },
-  };
-
-  createEffect(() => {
-    if (!showFallback()) return;
+  const refresh = () => {
     let busy = false;
-    for (const res of pending) {
-      if (typeof res.loading === 'function' && res.loading()) {
+    for (const entry of pending) {
+      if (typeof entry?.loading === 'function') {
+        if (entry.loading()) busy = true;
+      } else if (entry != null && typeof entry.then === 'function') {
         busy = true;
       }
     }
     if (!busy) {
       pending.clear();
       setShowFallback(false);
+    } else {
+      setShowFallback(true);
     }
+  };
+
+  const ctx = {
+    track(entry) {
+      if (entry == null) return;
+      pending.add(entry);
+      setShowFallback(true);
+
+      if (typeof entry.then === 'function') {
+        trackSSRThenables(entry);
+        entry.then(
+          () => {
+            pending.delete(entry);
+            refresh();
+          },
+          () => {
+            pending.delete(entry);
+            refresh();
+          }
+        );
+        return;
+      }
+
+      if (typeof entry.promise === 'function') {
+        const p = entry.promise();
+        if (p && typeof p.then === 'function') {
+          trackSSRThenables(p);
+        }
+      } else if (entry._promise && typeof entry._promise.then === 'function') {
+        trackSSRThenables(entry._promise);
+      }
+    },
+  };
+
+  createEffect(() => {
+    if (!showFallback()) return;
+    refresh();
   });
 
   return jsx(SuspenseBoundary, {
@@ -72,3 +106,6 @@ function SuspenseBoundary(props) {
 
   return props.children;
 }
+
+/** SSR serialize pops suspense after this component's subtree is walked. */
+SuspenseBoundary.$$ssrPopSuspense = true;

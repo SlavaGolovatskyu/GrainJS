@@ -1,19 +1,12 @@
-import { Fragment } from '../core/jsx-compiler-new/jsx-runtime.js';
-
-const BOOLEAN_ATTRS = new Set([
-  'disabled',
-  'checked',
-  'selected',
-  'readonly',
-  'required',
-  'multiple',
-  'hidden',
-  'autofocus',
-  'controls',
-  'loop',
-  'muted',
-  'open',
-]);
+import { popSuspenseContext } from '../core/flow/context.js';
+import {
+  BOOLEAN_ATTRS,
+  isFragmentType,
+  isComponentType,
+  isAccessor,
+  toText,
+  normalizeChildren,
+} from '../core/shared/vnode.js';
 
 export function escapeHtml(value) {
   return String(value)
@@ -22,18 +15,6 @@ export function escapeHtml(value) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
-}
-
-function isFragmentType(type) {
-  return type === Fragment;
-}
-
-function isComponentType(type) {
-  return typeof type === 'function' && !isFragmentType(type);
-}
-
-function isAccessor(value) {
-  return typeof value === 'function';
 }
 
 function resolvePropValue(value) {
@@ -45,11 +26,6 @@ function resolvePropValue(value) {
     }
   }
   return value;
-}
-
-function toText(value) {
-  if (value == null || value === false || value === true) return '';
-  return String(value);
 }
 
 function isEventProp(key) {
@@ -112,12 +88,6 @@ const VOID_TAGS = new Set([
   'wbr',
 ]);
 
-function normalizeChildren(children) {
-  if (children == null || children === false) return [];
-  const list = Array.isArray(children) ? children.flat(Infinity) : [children];
-  return list.filter((child) => child !== null && child !== undefined && child !== false);
-}
-
 function wrapContents(inner, marker) {
   return `<span ${marker} style="display:contents">${inner}</span>`;
 }
@@ -176,6 +146,10 @@ export function serializeVnode(vdom, renderComponent) {
     }
     const result = renderComponent(type, childProps);
     const inner = serializeVnode(result, renderComponent);
+    // SuspenseBoundary pushes context for its subtree; pop after children serialize.
+    if (type.$$ssrPopSuspense) {
+      popSuspenseContext();
+    }
     return wrapContents(inner, 'data-component=""');
   }
 

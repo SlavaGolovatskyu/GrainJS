@@ -1,12 +1,12 @@
+import { render } from 'grainlet';
 import {
-  render,
   Router,
   Route,
   Link,
   navigate,
   useParams,
   useLocation,
-} from 'grainlet';
+} from 'grainlet/route';
 
 function Home() {
   return (

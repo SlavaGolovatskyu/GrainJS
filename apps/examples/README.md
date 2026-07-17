@@ -64,7 +64,7 @@ Async / await patterns:
 - Effect cleanup that aborts in-flight work
 
 ### 12-routing.html
-Client-side History API routing:
+Client-side History API routing (`grainlet/route`):
 - `Router` / `Route` / `Link` / `navigate`
 - `useParams` and `useLocation`
 - 404 catch-all (`*`)

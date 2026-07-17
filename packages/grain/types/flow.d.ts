@@ -114,6 +114,7 @@ export interface Resource<T> extends Accessor<T | undefined> {
   error: Accessor<unknown>;
   loading: Accessor<boolean>;
   latest: Accessor<T | undefined>;
+  promise: () => Promise<unknown> | null;
   refetch: () => void;
 }
 
@@ -131,3 +132,10 @@ export declare function createResource<T, S>(
     info: { value: T | undefined; refetching: boolean }
   ) => T | Promise<T>
 ): [Resource<T>];
+
+/**
+ * Lazy-load a component. Wrap in `<Suspense>`. Works with `renderToStringAsync`.
+ */
+export declare function lazy<T extends Component = Component>(
+  loader: () => Promise<{ default: T } | T>
+): T;

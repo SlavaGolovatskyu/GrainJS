@@ -1,6 +1,6 @@
 {
   "name": "grainlet",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Fine-grained signals, JSX, routing, and SSR for the web",
   "type": "module",
   "license": "MIT",
@@ -10,6 +10,14 @@
     ".": {
       "types": "./index.d.ts",
       "default": "./index.js"
+    },
+    "./route": {
+      "types": "./route.d.ts",
+      "default": "./route/index.js"
+    },
+    "./ssr": {
+      "types": "./ssr.d.ts",
+      "default": "./ssr/index.js"
     },
     "./jsx-runtime": {
       "types": "./jsx-runtime.d.ts",
@@ -32,6 +40,8 @@
   "files": [
     "index.js",
     "index.d.ts",
+    "route.d.ts",
+    "ssr.d.ts",
     "jsx-runtime.d.ts",
     "jsx-dev-runtime.d.ts",
     "types",
@@ -43,7 +53,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "test": "node test/keyed-unmount.test.mjs && node test/virtual-list.test.mjs"
+    "test": "node test/keyed-unmount.test.mjs && node test/virtual-list.test.mjs && node test/render-async.test.mjs"
   },
   "devDependencies": {
     "jsdom": "^26.1.0"

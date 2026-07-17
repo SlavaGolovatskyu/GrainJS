@@ -24,25 +24,5 @@ export {
   createContext,
   useContext,
   createResource,
+  lazy,
 } from './core/index.js';
-
-export {
-  Router,
-  Route,
-  Link,
-  navigate,
-  setNavigateBasename,
-  getNavigateBasename,
-  useLocation,
-  useParams,
-  matchPath,
-  matchRoutes,
-} from './route/index.js';
-
-export {
-  renderToString,
-  wrapHtmlDocument,
-  runWithSSR,
-  getSSRContext,
-} from './ssr/index.js';
-

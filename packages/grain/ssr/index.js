@@ -1,4 +1,4 @@
-export { renderToString } from './render-to-string.js';
+export { renderToString, renderToStringAsync } from './render-to-string.js';
 export { wrapHtmlDocument } from './document.js';
 export { hydrate } from './hydrate.js';
 export { runWithSSR, isServer, getSSRContext } from './context.js';

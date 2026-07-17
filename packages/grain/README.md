@@ -56,9 +56,13 @@ export default defineConfig({
 
 | Import | Purpose |
 |--------|---------|
-| `grainlet` | Public API (signals, render, hydrate, router, SSR) |
+| `grainlet` | Core API (signals, flow, render, hydrate) |
+| `grainlet/route` | History API routing (`Router`, `Route`, `Link`, …) |
+| `grainlet/ssr` | Server render (`renderToString`, `renderToStringAsync`, …) |
 | `grainlet/jsx-runtime` | Automatic JSX runtime |
 | `grainlet-vite` | `grainJsx()` Vite plugin (separate package, `devDependency`) |
+
+> **Breaking:** Router and SSR APIs are no longer re-exported from `grainlet`. Import them from `grainlet/route` and `grainlet/ssr`.
 
 ## Control flow
 
@@ -75,6 +79,7 @@ import {
   createContext,
   useContext,
   createResource,
+  lazy,
 } from 'grainlet';
 ```
 
@@ -84,11 +89,12 @@ import {
 | `For` | Map `each` list to children; prefers `item.id` keys |
 | `VirtualList` | Windowed list (vertical or horizontal) — overscan, optional `debounceTime`, infinite scroll via `onEndReached` |
 | `Switch` / `Match` | First matching `when` branch |
-| `Suspense` | `fallback` while nested `createResource` is pending |
+| `Suspense` | `fallback` while nested `createResource` / `lazy` is pending |
 | `ErrorBoundary` | Catch render/update errors; `fallback` or `(error, reset) => …` |
 | `Portal` | Render children into `document.body` (or `mount`) |
 | `createContext` / `useContext` | Share data without prop drilling (`Provider` + consume) |
 | `createResource` | Async data `[resource]` — `resource()` reads value |
+| `lazy` | Lazy-load a component (`lazy(() => import('./Page.js'))`) |
 
 Prefer these over `{cond() && <X/>}` so conditionals update without re-running the parent.
 
@@ -263,7 +269,7 @@ import {
   navigate,
   useParams,
   useLocation,
-} from 'grainlet';
+} from 'grainlet/route';
 
 function User() {
   const params = useParams();
@@ -308,9 +314,26 @@ navigate('/users/3');
 ## SSR
 
 ```js
-import { renderToString, wrapHtmlDocument, hydrate } from 'grainlet';
+import { Suspense, lazy, hydrate } from 'grainlet';
+import {
+  renderToString,
+  renderToStringAsync,
+  wrapHtmlDocument,
+} from 'grainlet/ssr';
 
 const body = renderToString(App, {}, { url: 'http://localhost/' });
+
+// Await lazy / createResource before emitting HTML (resolved content, not fallback)
+const Home = lazy(() => import('./pages/home.js'));
+function App() {
+  return (
+    <Suspense fallback={<p>Loading</p>}>
+      <Home />
+    </Suspense>
+  );
+}
+const asyncBody = await renderToStringAsync(App);
 ```
 
 On the server, `createEffect` is a no-op; `createMemo` evaluates once for the HTML snapshot.
+`renderToStringAsync` keeps SSR mode on across passes until pending Suspense work settles.

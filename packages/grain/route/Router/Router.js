@@ -1,5 +1,6 @@
 import { createComponent } from '../../core/component/component.js';
 import { jsx } from '../../core/jsx-compiler-new/jsx-runtime.js';
+import { asArray } from '../../core/flow/resolve.js';
 import { ensureHistoryListener, getLocationSignal } from '../location/location.js';
 import { matchRoutes } from '../match/match.js';
 import { setCurrentRouteMatch } from '../context/context.js';
@@ -10,11 +11,6 @@ import {
   stripBasename,
   normalizeBasename,
 } from '../navigate/navigate.js';
-
-function asArray(value) {
-  if (value == null || value === false) return [];
-  return Array.isArray(value) ? value.flat(Infinity) : [value];
-}
 
 /**
  * Turn Router children / routes prop into { path, component, children }[].
