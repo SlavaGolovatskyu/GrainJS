@@ -1,0 +1,31 @@
+{
+  "name": "bench",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 3020",
+    "bench": "vite build && vite preview --host 127.0.0.1 --port 3020 --open",
+    "bench:dev": "vite --open",
+    "bench:collect": "node scripts/run.mjs"
+  },
+  "dependencies": {
+    "grainlet": "1.0.19",
+    "preact": "10.26.5",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "solid-js": "1.9.5"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.0",
+    "@babel/plugin-syntax-jsx": "^7.23.0",
+    "@preact/preset-vite": "^2.10.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "grainlet-vite": "*",
+    "playwright": "^1.51.0",
+    "vite": "^5.0.0",
+    "vite-plugin-solid": "^2.11.6"
+  }
+}

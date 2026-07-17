@@ -1,6 +1,6 @@
 {
   "name": "grainlet",
-  "version": "1.0.12",
+  "version": "1.0.19",
   "description": "Fine-grained signals, JSX, routing, and SSR for the web",
   "type": "module",
   "license": "MIT",
@@ -53,7 +53,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "test": "node test/keyed-unmount.test.mjs && node test/virtual-list.test.mjs && node test/render-async.test.mjs"
+    "test": "node test/keyed-unmount.test.mjs && node test/virtual-list.test.mjs && node test/render-async.test.mjs && node test/for-bench-repro.test.mjs"
   },
   "devDependencies": {
     "jsdom": "^26.1.0"

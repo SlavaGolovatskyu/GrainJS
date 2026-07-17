@@ -45,3 +45,29 @@ export function vnodeKey(vdom) {
   if (vdom.key != null) return vdom.key;
   return vdom.props?.key;
 }
+
+/** Accessor / expression results that are vnodes or arrays (not plain text). */
+export function isStructuredChild(value) {
+  if (Array.isArray(value)) return true;
+  return value != null && typeof value === 'object' && 'type' in value;
+}
+
+export function isEventProp(key) {
+  return key === 'onClick' || key === 'onclick' || /^on[A-Z]/.test(key);
+}
+
+/**
+ * Merge vnode.children into props when props.children is unset.
+ * Preserves props identity when there are no kids or children already set.
+ */
+export function mergeComponentProps(props, children) {
+  const base = props || {};
+  const kids = normalizeChildren(children);
+  if (kids.length === 0 || base.children !== undefined) {
+    return base;
+  }
+  return {
+    ...base,
+    children: kids.length === 1 ? kids[0] : kids,
+  };
+}

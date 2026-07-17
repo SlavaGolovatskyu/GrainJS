@@ -13,6 +13,8 @@
     "preview": "vite preview",
     "ssr:demo": "npm run start -w ssr-demo",
     "dev:github-lookup": "npm run dev -w github-lookup",
+    "bench": "npm run bench -w bench",
+    "bench:collect": "npm run bench:collect -w bench",
     "pack:lib": "npm pack -w grainlet",
     "pack:vite": "npm pack -w grainlet-vite",
     "pack:create": "npm pack -w create-grainlet",

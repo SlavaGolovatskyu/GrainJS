@@ -1,10 +1,22 @@
 import { createSignal } from '../../signals/createSignal/createSignal.js';
+import { isServer } from '../../signals/env.js';
+import { currentComponent } from '../../signals/reactive-context/reactive-context.js';
 import { readProp } from './resolve.js';
 import {
   resolveKeyed,
   normalizeEach,
-  syncKeyedRows,
+  reconcileKeyedList,
+  clearKeyedList,
+  mapKeyedVnodes,
 } from './keyed-list.js';
+
+function renderForSSR(props) {
+  const items = normalizeEach(readProp(props.each));
+  if (items.length === 0) {
+    return props.fallback ?? null;
+  }
+  return mapKeyedVnodes(items, resolveKeyed(props.keyed), props.children);
+}
 
 /**
  * Map a reactive list to children. Prefer stable keys via item.id or `keyed`.
@@ -15,17 +27,36 @@ import {
  *   </For>
  */
 export function For(props) {
-  // Stable bag across For re-renders (hooks-style signal reuse).
+  if (isServer()) {
+    return renderForSSR(props);
+  }
+
+  const owner = currentComponent;
   const [getBag] = createSignal({ rows: new Map() });
   const bag = getBag();
 
   const items = normalizeEach(readProp(props.each));
-  const keyed = resolveKeyed(props.keyed);
+  const parent = owner?._parentElement;
+
+  if (!parent) {
+    return null;
+  }
 
   if (items.length === 0) {
-    bag.rows.clear();
+    clearKeyedList(parent, bag, owner);
     return props.fallback ?? null;
   }
 
-  return syncKeyedRows(bag, items, keyed, props.children);
+  reconcileKeyedList(
+    parent,
+    bag,
+    items,
+    resolveKeyed(props.keyed),
+    props.children,
+    owner
+  );
+
+  // Placeholder text node kept as `_element` so parent patchDom has a stable
+  // child; real rows are siblings under the same component host.
+  return null;
 }

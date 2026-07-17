@@ -8,7 +8,7 @@ import { readProp } from './resolve.js';
 import {
   resolveKeyed,
   normalizeEach,
-  syncKeyedRows,
+  mapKeyedVnodes,
 } from './keyed-list.js';
 
 function resolveOrientation(value) {
@@ -20,11 +20,10 @@ function resolveOrientation(value) {
 function buildRows(bag, items, start, end, keyed, render, horizontal) {
   const mainSize = bag.itemSize;
 
-  return syncKeyedRows(bag, items, keyed, render, {
+  return mapKeyedVnodes(items, keyed, render, {
     start,
     end,
-    mapRow(row, index) {
-      const key = row.vnode.key;
+    mapRow(vnode, index, _item, key) {
       const slotStyle = horizontal
         ? {
             width: `${mainSize}px`,
@@ -44,7 +43,7 @@ function buildRows(bag, items, start, end, keyed, render, horizontal) {
           'data-index': index,
           style: slotStyle,
         },
-        row.vnode
+        vnode
       );
     },
   });

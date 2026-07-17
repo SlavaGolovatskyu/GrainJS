@@ -6,6 +6,9 @@ import {
   isAccessor,
   toText,
   normalizeChildren,
+  isEventProp,
+  isStructuredChild,
+  mergeComponentProps,
 } from '../core/shared/vnode.js';
 
 export function escapeHtml(value) {
@@ -26,10 +29,6 @@ function resolvePropValue(value) {
     }
   }
   return value;
-}
-
-function isEventProp(key) {
-  return key === 'onClick' || key === 'onclick' || /^on[A-Z]/.test(key);
 }
 
 function serializeAttrs(props) {
@@ -107,12 +106,12 @@ export function serializeVnode(vdom, renderComponent) {
 
   if (isAccessor(vdom)) {
     const resolved = resolvePropValue(vdom);
-    if (Array.isArray(resolved)) {
-      return normalizeChildren(resolved)
-        .map((child) => serializeVnode(child, renderComponent))
-        .join('');
-    }
-    if (resolved != null && typeof resolved === 'object' && 'type' in resolved) {
+    if (isStructuredChild(resolved)) {
+      if (Array.isArray(resolved)) {
+        return normalizeChildren(resolved)
+          .map((child) => serializeVnode(child, renderComponent))
+          .join('');
+      }
       return serializeVnode(resolved, renderComponent);
     }
     return escapeHtml(toText(resolved));
@@ -139,11 +138,7 @@ export function serializeVnode(vdom, renderComponent) {
   }
 
   if (isComponentType(type)) {
-    const childProps = { ...(props || {}) };
-    const kids = normalizeChildren(children);
-    if (kids.length > 0 && childProps.children === undefined) {
-      childProps.children = kids.length === 1 ? kids[0] : kids;
-    }
+    const childProps = mergeComponentProps(props, children);
     const result = renderComponent(type, childProps);
     const inner = serializeVnode(result, renderComponent);
     // SuspenseBoundary pushes context for its subtree; pop after children serialize.

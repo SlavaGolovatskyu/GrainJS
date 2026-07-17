@@ -7,7 +7,10 @@ import {
   toText,
   normalizeChildren,
   vnodeKey,
+  isStructuredChild,
+  mergeComponentProps,
 } from '../shared/vnode.js';
+import { createContentsHost } from './hosts.js';
 
 const LISTENERS = Symbol('listeners');
 const PREV_PROPS = Symbol('prevProps');
@@ -52,17 +55,30 @@ function eventName(key) {
   return null;
 }
 
-/** Accessor results that should render as DOM, not String(value). */
-function isStructuredChild(value) {
-  if (Array.isArray(value)) return true;
-  return value != null && typeof value === 'object' && 'type' in value;
-}
-
 function disposeTextBinding(node) {
   if (node && node[TEXT_DISPOSE]) {
     node[TEXT_DISPOSE]();
     node[TEXT_DISPOSE] = null;
   }
+}
+
+function disposeNodeBindings(node) {
+  disposeTextBinding(node);
+  if (node?.[PROP_DISPOSES]) {
+    for (const dispose of node[PROP_DISPOSES].values()) {
+      dispose();
+    }
+    node[PROP_DISPOSES].clear();
+  }
+  clearRefTree(node);
+}
+
+function pathMatchesPrefix(key, pathPrefix) {
+  return (
+    key === pathPrefix ||
+    key.startsWith(pathPrefix + '.') ||
+    key.startsWith(pathPrefix + ':')
+  );
 }
 
 function bindText(node, accessor) {
@@ -99,9 +115,7 @@ function unwrapAccessorValue(value) {
 }
 
 function createDynamicChild(accessor, owner, path) {
-  const host = document.createElement('span');
-  host.style.display = 'contents';
-  host.setAttribute('data-fg', 'dynamic');
+  const host = createContentsHost('data-fg', 'dynamic');
 
   disposeTextBinding(host);
   host[TEXT_DISPOSE] = createBindingEffect(() => {
@@ -132,6 +146,40 @@ function createDynamicChild(accessor, owner, path) {
   return host;
 }
 
+/**
+ * Primitive accessor children bind a text node (no wrapper span).
+ * Structured accessor results still use a display:contents host.
+ */
+function createAccessorChild(accessor, owner, path) {
+  let node = null;
+
+  const dispose = createBindingEffect(() => {
+    const value = unwrapAccessorValue(accessor());
+    if (isStructuredChild(value)) {
+      if (!isDynamicHost(node)) {
+        node = createContentsHost('data-fg', 'dynamic');
+      }
+      const kids = Array.isArray(value) ? normalizeChildren(value) : [value];
+      patchChildren(node, kids, owner, path);
+      return;
+    }
+
+    clearChildRange(owner, path);
+    const text = toText(value);
+    if (node && node.nodeType === Node.TEXT_NODE) {
+      if (node.nodeValue !== text) node.nodeValue = text;
+      return;
+    }
+    node = document.createTextNode(text);
+  });
+
+  if (node) {
+    disposeTextBinding(node);
+    node[TEXT_DISPOSE] = dispose;
+  }
+  return node;
+}
+
 function isDynamicHost(node) {
   return (
     node &&
@@ -151,6 +199,11 @@ function disposePropBinding(el, key) {
 function setStaticProp(el, key, value) {
   if (key === 'className' || key === 'class') {
     el.className = value == null ? '' : String(value);
+    return;
+  }
+
+  if (key === 'id') {
+    el.id = value == null || value === false ? '' : String(value);
     return;
   }
 
@@ -202,16 +255,7 @@ function bindProp(el, key, accessor) {
 }
 
 function componentProps(vdom) {
-  const base = vdom.props || {};
-  const kids = normalizeChildren(vdom.children);
-  // Preserve props identity when children already live on props (e.g. For rows).
-  if (kids.length === 0 || base.children !== undefined) {
-    return base;
-  }
-  return {
-    ...base,
-    children: kids.length === 1 ? kids[0] : kids,
-  };
+  return mergeComponentProps(vdom.props, vdom.children);
 }
 
 export function applyProps(el, props, owner) {
@@ -230,6 +274,8 @@ export function applyProps(el, props, owner) {
         disposePropBinding(el, key);
         if (key === 'className' || key === 'class') {
           el.className = '';
+        } else if (key === 'id') {
+          el.id = '';
         } else if (BOOLEAN_ATTRS.has(key)) {
           el.removeAttribute(key);
           el[key] = false;
@@ -273,11 +319,7 @@ export function applyProps(el, props, owner) {
 function clearChildRange(owner, pathPrefix) {
   if (!owner?._children) return;
   for (const key of [...owner._children.keys()]) {
-    if (
-      key === pathPrefix ||
-      key.startsWith(pathPrefix + '.') ||
-      key.startsWith(pathPrefix + ':')
-    ) {
+    if (pathMatchesPrefix(key, pathPrefix)) {
       const entry = owner._children.get(key);
       if (entry?.instance) {
         entry.instance.unmount();
@@ -287,29 +329,34 @@ function clearChildRange(owner, pathPrefix) {
   }
 }
 
-/** Prefer stable keyed owner paths so list reorder does not remount. */
-function childOwnerPath(path, index, vdom) {
-  const key = getVdomKey(vdom);
-  return key != null ? `${path}:${key}` : `${path}.${index}`;
-}
-
-function removeNode(parentEl, node, owner, path) {
+/** Unmount child components under `path` and remove `node` from `parentEl`. */
+export function unmountOwnedNode(parentEl, node, owner, path) {
   clearChildRange(owner, path);
-  disposeTextBinding(node);
-  if (node?.[PROP_DISPOSES]) {
-    for (const dispose of node[PROP_DISPOSES].values()) {
-      dispose();
-    }
-    node[PROP_DISPOSES].clear();
-  }
-  clearRefTree(node);
+  disposeTreeBindings(node);
   if (node && node.parentNode === parentEl) {
     parentEl.removeChild(node);
   }
 }
 
-function getVdomKey(vdom) {
-  return vnodeKey(vdom);
+function disposeTreeBindings(node) {
+  if (!node) return;
+  disposeNodeBindings(node);
+  let child = node.firstChild;
+  while (child) {
+    const next = child.nextSibling;
+    disposeTreeBindings(child);
+    child = next;
+  }
+}
+
+/** Prefer stable keyed owner paths so list reorder does not remount. */
+function childOwnerPath(path, index, vdom) {
+  const key = vnodeKey(vdom);
+  return key != null ? `${path}:${key}` : `${path}.${index}`;
+}
+
+function removeNode(parentEl, node, owner, path) {
+  unmountOwnedNode(parentEl, node, owner, path);
 }
 
 function setNodeKey(node, key) {
@@ -330,6 +377,14 @@ function getNodeKey(node) {
   return undefined;
 }
 
+function appendVdomChildren(parent, children, owner, path) {
+  normalizeChildren(children).forEach((child, i) => {
+    const childNode = createDom(child, owner, childOwnerPath(path, i, child));
+    setNodeKey(childNode, vnodeKey(child));
+    parent.appendChild(childNode);
+  });
+}
+
 export function createDom(vdom, owner, path = '0') {
   if (vdom == null || vdom === false || vdom === true) {
     return document.createTextNode('');
@@ -340,18 +395,12 @@ export function createDom(vdom, owner, path = '0') {
   }
 
   if (isAccessor(vdom)) {
-    return createDynamicChild(vdom, owner, path);
+    return createAccessorChild(vdom, owner, path);
   }
 
   if (Array.isArray(vdom)) {
-    const host = document.createElement('span');
-    host.style.display = 'contents';
-    host.setAttribute('data-fg', 'fragment');
-    normalizeChildren(vdom).forEach((child, i) => {
-      const childNode = createDom(child, owner, childOwnerPath(path, i, child));
-      setNodeKey(childNode, getVdomKey(child));
-      host.appendChild(childNode);
-    });
+    const host = createContentsHost('data-fg', 'fragment');
+    appendVdomChildren(host, vdom, owner, path);
     return host;
   }
 
@@ -362,46 +411,29 @@ export function createDom(vdom, owner, path = '0') {
   const { type } = vdom;
 
   if (isFragmentType(type)) {
-    const host = document.createElement('span');
-    host.style.display = 'contents';
-    host.setAttribute('data-fg', 'fragment');
-    setNodeKey(host, getVdomKey(vdom));
-    normalizeChildren(vdom.children).forEach((child, i) => {
-      const childNode = createDom(child, owner, childOwnerPath(path, i, child));
-      setNodeKey(childNode, getVdomKey(child));
-      host.appendChild(childNode);
-    });
+    const host = createContentsHost('data-fg', 'fragment');
+    setNodeKey(host, vnodeKey(vdom));
+    appendVdomChildren(host, vdom.children, owner, path);
     return host;
   }
 
   if (isComponentType(type)) {
     const host = owner._mountChild(path, type, componentProps(vdom));
-    setNodeKey(host, getVdomKey(vdom));
+    setNodeKey(host, vnodeKey(vdom));
     return host;
   }
 
   const el = document.createElement(type);
   applyProps(el, vdom.props, owner);
-  setNodeKey(el, getVdomKey(vdom));
-  normalizeChildren(vdom.children).forEach((child, i) => {
-    const childNode = createDom(child, owner, childOwnerPath(path, i, child));
-    setNodeKey(childNode, getVdomKey(child));
-    el.appendChild(childNode);
-  });
+  setNodeKey(el, vnodeKey(vdom));
+  appendVdomChildren(el, vdom.children, owner, path);
   return el;
 }
 
 function replaceNode(parent, oldDom, newDom) {
   if (oldDom === newDom) return newDom;
   if (oldDom) {
-    disposeTextBinding(oldDom);
-    if (oldDom[PROP_DISPOSES]) {
-      for (const dispose of oldDom[PROP_DISPOSES].values()) {
-        dispose();
-      }
-      oldDom[PROP_DISPOSES].clear();
-    }
-    clearRefTree(oldDom);
+    disposeNodeBindings(oldDom);
   }
   if (oldDom && oldDom.parentNode === parent) {
     parent.replaceChild(newDom, oldDom);
@@ -444,13 +476,24 @@ export function patchDom(parent, oldDom, newVdom, owner, path = '0') {
   }
 
   if (isAccessor(newVdom)) {
-    if (isDynamicHost(oldDom)) {
+    if (
+      isDynamicHost(oldDom) ||
+      (oldDom && oldDom.nodeType === Node.TEXT_NODE && oldDom[TEXT_DISPOSE])
+    ) {
       disposeTextBinding(oldDom);
-      // Re-bind on the same host so structured/text updates share one node.
-      return replaceNode(parent, oldDom, createDynamicChild(newVdom, owner, path));
+      // Re-bind: primitives stay text nodes; structured values get a host.
+      return replaceNode(
+        parent,
+        oldDom,
+        createAccessorChild(newVdom, owner, path)
+      );
     }
     clearChildRange(owner, path);
-    return replaceNode(parent, oldDom, createDynamicChild(newVdom, owner, path));
+    return replaceNode(
+      parent,
+      oldDom,
+      createAccessorChild(newVdom, owner, path)
+    );
   }
 
   if (typeof newVdom === 'string' || typeof newVdom === 'number') {
@@ -528,7 +571,7 @@ export function patchDom(parent, oldDom, newVdom, owner, path = '0') {
 
 function patchChildren(parentEl, newChildren, owner, path) {
   const oldNodes = [...parentEl.childNodes];
-  const keyed = newChildren.some((child) => getVdomKey(child) != null);
+  const keyed = newChildren.some((child) => vnodeKey(child) != null);
 
   if (!keyed) {
     const max = Math.max(oldNodes.length, newChildren.length);
@@ -546,13 +589,13 @@ function patchChildren(parentEl, newChildren, owner, path) {
 
       if (!oldNode) {
         const node = createDom(newChild, owner, childPath);
-        setNodeKey(node, getVdomKey(newChild));
+        setNodeKey(node, vnodeKey(newChild));
         parentEl.appendChild(node);
         continue;
       }
 
       const next = patchDom(parentEl, oldNode, newChild, owner, childPath);
-      setNodeKey(next, getVdomKey(newChild));
+      setNodeKey(next, vnodeKey(newChild));
     }
     return;
   }
@@ -571,7 +614,7 @@ function patchChildren(parentEl, newChildren, owner, path) {
 
   for (let i = 0; i < newChildren.length; i++) {
     const newChild = newChildren[i];
-    const key = getVdomKey(newChild);
+    const key = vnodeKey(newChild);
     const childPath = childOwnerPath(path, i, newChild);
     let oldNode;
 
@@ -634,13 +677,7 @@ function clearOwnedHostsUnder(owner, pathPrefix, node) {
   }
   for (const [childPath, entry] of [...owner._children.entries()]) {
     if (entry.host === node) continue;
-    if (
-      !(
-        childPath === pathPrefix ||
-        childPath.startsWith(pathPrefix + '.') ||
-        childPath.startsWith(pathPrefix + ':')
-      )
-    ) {
+    if (!pathMatchesPrefix(childPath, pathPrefix)) {
       continue;
     }
     if (entry.host && node.contains(entry.host)) {

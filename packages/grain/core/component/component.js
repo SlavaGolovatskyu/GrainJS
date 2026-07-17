@@ -5,6 +5,7 @@ import {
 import { createEffect } from '../../signals/createEffect/createEffect.js';
 import { componentSignalRegistry } from '../../signals/createSignal/createSignal.js';
 import { createDom, patchDom, adoptDom, unmountDomTree } from '../dom/dom.js';
+import { createContentsHost } from '../dom/hosts.js';
 import { getErrorBoundary } from '../flow/context.js';
 
 /** Ensure `type` is a createComponent factory (caches on `type.$$wrapped`). */
@@ -33,7 +34,7 @@ const componentProto = {
     const existing = this._children.get(path);
 
     if (existing && existing.factory === factory) {
-      // Same props object (e.g. For row) — skip; item signals drive the row.
+      // Same props object — skip; otherwise update.
       if (existing.instance._props !== childProps) {
         existing.instance.update(childProps);
       }
@@ -47,9 +48,7 @@ const componentProto = {
 
     let host = options.host;
     if (!host) {
-      host = document.createElement('span');
-      host.style.display = 'contents';
-      host.setAttribute('data-component', '');
+      host = createContentsHost('data-component', '');
     }
 
     const child = factory(childProps);
@@ -111,7 +110,7 @@ const componentProto = {
         const boundary = getErrorBoundary();
         if (boundary) {
           // Defer so the current mount/patch stack can unwind before fallback remount.
-          queueMicrotask(() => boundary.catch(err));
+          voidMicrotask(() => boundary.catch(err));
           return;
         }
         console.error('Uncaught render error:', err);
