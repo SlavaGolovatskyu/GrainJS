@@ -1,21 +1,13 @@
-import { createComponent } from '../component/component.js';
-
-function asComponentFactory(type) {
-  if (typeof type !== 'function') {
-    throw new TypeError('render() expects a component function');
-  }
-  if (type.$$component) return type;
-  if (!type.$$wrapped) {
-    type.$$wrapped = createComponent(type);
-  }
-  return type.$$wrapped;
-}
+import { asComponentFactory } from '../component/component.js';
 
 /**
  * Mount a component into a container.
  * Accepts either a createComponent factory or a plain function (auto-wrapped).
  */
 export function render(Component, container, props = {}) {
+  if (typeof Component !== 'function') {
+    throw new TypeError('render() expects a component function');
+  }
   container.innerHTML = '';
 
   const factory = asComponentFactory(Component);
@@ -32,6 +24,9 @@ export function render(Component, container, props = {}) {
 export function hydrate(Component, container, props = {}) {
   if (!container) {
     throw new TypeError('hydrate() requires a container element');
+  }
+  if (typeof Component !== 'function') {
+    throw new TypeError('hydrate() expects a component function');
   }
 
   const factory = asComponentFactory(Component);
