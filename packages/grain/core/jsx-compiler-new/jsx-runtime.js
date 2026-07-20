@@ -5,6 +5,15 @@
  * Classic / jsxDEV bridge: jsx(type, props, ...children)
  */
 
+export {
+  template,
+  mountTemplate,
+  bindTemplateText,
+  bindTemplateProp,
+  bindTemplateEvent,
+  walkPath,
+} from '../dom/template.js';
+
 export function jsx(type, props, ...rest) {
   const input = props || {};
   const hasChildrenProp = Object.prototype.hasOwnProperty.call(input, 'children');

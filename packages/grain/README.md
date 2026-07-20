@@ -58,11 +58,12 @@ export default defineConfig({
 |--------|---------|
 | `grainlet` | Core API (signals, flow, render, hydrate) |
 | `grainlet/route` | History API routing (`Router`, `Route`, `Link`, …) |
+| `grainlet/forms` | Form state (`FormProvider`, `Field`, `createForm`, …) — see [forms/README.md](./forms/README.md) |
 | `grainlet/ssr` | Server render (`renderToString`, `renderToStringAsync`, …) |
 | `grainlet/jsx-runtime` | Automatic JSX runtime |
 | `grainlet-vite` | `grainJsx()` Vite plugin (separate package, `devDependency`) |
 
-> **Breaking:** Router and SSR APIs are no longer re-exported from `grainlet`. Import them from `grainlet/route` and `grainlet/ssr`.
+> **Breaking:** Router and SSR APIs are no longer re-exported from `grainlet`. Import them from `grainlet/route` and `grainlet/ssr`. Forms live under `grainlet/forms` only.
 
 ## Control flow
 
@@ -256,6 +257,63 @@ render(App, document.getElementById('app')!);
 ```
 
 `grainlet-vite` includes typings for `grainJsx()`.
+
+## Forms
+
+Formik-inspired forms — import from **`grainlet/forms`**:
+
+```js
+import {
+  FormProvider,
+  Form,
+  Field,
+  ErrorMessage,
+  createForm,
+  useFormContext,
+  required,
+  isEmail,
+  minLength,
+} from 'grainlet/forms';
+
+function Signup() {
+  return (
+    <FormProvider
+      initialValues={{ email: '', password: '' }}
+      rules={{
+        email: [required('Email is required'), isEmail('Enter a valid email')],
+        password: [
+          required('Password is required'),
+          minLength(8, 'Use at least 8 characters'),
+        ],
+      }}
+      onSubmit={async (values) => {
+        await api.signup(values);
+      }}
+    >
+      <Form>
+        <Field name="email" type="email" />
+        <ErrorMessage name="email" />
+        <Field name="password" type="password" />
+        <ErrorMessage name="password" />
+        <button type="submit">Sign up</button>
+      </Form>
+    </FormProvider>
+  );
+}
+```
+
+Headless (no provider):
+
+```js
+const form = createForm({
+  initialValues: { email: '' },
+  rules: { email: [required(), isEmail()] },
+  onSubmit: async (values) => { /* … */ },
+});
+// form.values(), form.handleChange, form.handleSubmit, …
+```
+
+Supports nested paths (`social.facebook`, `friends[0]`), field-level `validate={[required(), isEmail()]}`, optional Yup `validationSchema`, and `FieldArray`. Full guide: **[forms/README.md](./forms/README.md)**.
 
 ## Routing
 

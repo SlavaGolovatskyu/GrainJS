@@ -1,4 +1,5 @@
-import { render, setNavigateBasename } from 'grainlet';
+import { render } from 'grainlet';
+import { setNavigateBasename } from 'grainlet/route';
 import { App } from './App.jsx';
 import './styles/globals.css';
 

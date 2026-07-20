@@ -207,7 +207,11 @@
     "guestCitiesCount": "{{count}} destinations",
     "guestSignInToExplore": "Sign in to explore {{city}}",
     "guestMapHint": "Sign in to browse places and plan trips in covered cities",
-    "backToCities": "All destinations"
+    "backToCities": "All destinations",
+    "saved": "Saved",
+    "savePlace": "Save",
+    "saveFailed": "Could not save place",
+    "rateFailed": "Could not rate place"
   },
   "auth": {
     "signInTitle": "Sign in to Zenwayro",

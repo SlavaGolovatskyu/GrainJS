@@ -1,6 +1,6 @@
 {
   "name": "grainlet",
-  "version": "1.0.19",
+  "version": "1.0.22",
   "description": "Fine-grained signals, JSX, routing, and SSR for the web",
   "type": "module",
   "license": "MIT",
@@ -14,6 +14,10 @@
     "./route": {
       "types": "./route.d.ts",
       "default": "./route/index.js"
+    },
+    "./forms": {
+      "types": "./forms.d.ts",
+      "default": "./forms/index.js"
     },
     "./ssr": {
       "types": "./ssr.d.ts",
@@ -41,6 +45,7 @@
     "index.js",
     "index.d.ts",
     "route.d.ts",
+    "forms.d.ts",
     "ssr.d.ts",
     "jsx-runtime.d.ts",
     "jsx-dev-runtime.d.ts",
@@ -48,15 +53,25 @@
     "signals",
     "core",
     "route",
+    "forms",
     "ssr",
     "README.md"
   ],
   "sideEffects": false,
   "scripts": {
-    "test": "node test/keyed-unmount.test.mjs && node test/virtual-list.test.mjs && node test/render-async.test.mjs && node test/for-bench-repro.test.mjs"
+    "test": "node test/keyed-unmount.test.mjs && node test/virtual-list.test.mjs && node test/render-async.test.mjs && node test/for-bench-repro.test.mjs && node test/template-for-smoke.test.mjs && node test/forms-paths.test.mjs && node test/forms-createForm.test.mjs && node test/forms-provider-smoke.test.mjs && node test/forms-yup.test.mjs && node test/forms-validators.test.mjs"
+  },
+  "peerDependencies": {
+    "yup": "^1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "yup": {
+      "optional": true
+    }
   },
   "devDependencies": {
-    "jsdom": "^26.1.0"
+    "jsdom": "^26.1.0",
+    "yup": "^1.7.1"
   },
   "keywords": [
     "grainlet",

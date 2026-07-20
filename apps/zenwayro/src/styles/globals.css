@@ -3,6 +3,10 @@
 @import 'tailwindcss';
 @plugin 'tailwindcss-animate';
 
+/* Monorepo: CSS lives under apps/zenwayro/src/styles — scan app sources explicitly */
+@source '../**/*.{js,jsx}';
+@source '../../../packages/grain/**/*.{js,jsx}';
+
 @theme inline {
   --color-nav-link-hover: var(--ds-accent-hover);
   --color-surface: var(--ds-surface);
@@ -118,6 +122,14 @@ body {
 
 .dark .maplibregl-popup-tip {
   @apply border-t-gray-800! border-b-gray-800!;
+}
+
+/* Router outlet must participate in AppShell main flex height so pages can fill. */
+main [data-router='outlet'] {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 100%;
 }
 
 /* Lift MapLibre scale + zoom above bottom app chrome (live nav, horizontal place strip, etc.) */

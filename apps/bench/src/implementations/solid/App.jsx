@@ -1,6 +1,5 @@
 import { createSignal, For } from 'solid-js';
 import { buildData, resetId, swapManyPairs } from '../../shared/data.js';
-import { BUTTONS } from '../../shared/contract.js';
 
 export function App() {
   const [data, setData] = createSignal([]);
@@ -37,16 +36,6 @@ export function App() {
   const swapMany = () => setData((d) => swapManyPairs(d, 100));
   const remove = (id) => setData((d) => d.filter((row) => row.id !== id));
 
-  const handlers = {
-    run,
-    runlots: runLots,
-    add,
-    update,
-    clear,
-    swaprows: swapRows,
-    swapmany: swapMany,
-  };
-
   return (
     <div class="container">
       <div class="jumbotron">
@@ -56,27 +45,73 @@ export function App() {
           </div>
           <div class="col-md-6">
             <div class="row">
-              <For each={() => BUTTONS}>
-                {(btn) => (
-                  <div class="col-sm-6 smallpad">
-                    <button
-                      type="button"
-                      class="btn btn-primary btn-block"
-                      id={btn.id}
-                      onClick={() => handlers[btn.id]()}
-                    >
-                      {btn.label}
-                    </button>
-                  </div>
-                )}
-              </For>
+              <div class="col-sm-6 smallpad">
+                <button type="button" class="btn btn-primary btn-block" id="run" onClick={run}>
+                  Create 1,000 rows
+                </button>
+              </div>
+              <div class="col-sm-6 smallpad">
+                <button
+                  type="button"
+                  class="btn btn-primary btn-block"
+                  id="runlots"
+                  onClick={runLots}
+                >
+                  Create 10,000 rows
+                </button>
+              </div>
+              <div class="col-sm-6 smallpad">
+                <button type="button" class="btn btn-primary btn-block" id="add" onClick={add}>
+                  Append 1,000 rows
+                </button>
+              </div>
+              <div class="col-sm-6 smallpad">
+                <button
+                  type="button"
+                  class="btn btn-primary btn-block"
+                  id="update"
+                  onClick={update}
+                >
+                  Update every 10th row
+                </button>
+              </div>
+              <div class="col-sm-6 smallpad">
+                <button
+                  type="button"
+                  class="btn btn-primary btn-block"
+                  id="clear"
+                  onClick={clear}
+                >
+                  Clear
+                </button>
+              </div>
+              <div class="col-sm-6 smallpad">
+                <button
+                  type="button"
+                  class="btn btn-primary btn-block"
+                  id="swaprows"
+                  onClick={swapRows}
+                >
+                  Swap Rows
+                </button>
+              </div>
+              <div class="col-sm-6 smallpad">
+                <button
+                  type="button"
+                  class="btn btn-primary btn-block"
+                  id="swapmany"
+                  onClick={swapMany}
+                >
+                  Swap 100 pairs
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
       <table class="table table-hover table-striped test-data">
         <tbody>
-          <For each={data}>
+          <For each={data()}>
             {(row) => (
               <tr
                 class={selected() === row.id ? 'danger' : ''}

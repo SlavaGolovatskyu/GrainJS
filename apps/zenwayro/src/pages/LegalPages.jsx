@@ -1,4 +1,4 @@
-import { Link } from 'grainlet';
+import { Link } from 'grainlet/route';
 import { t } from '../i18n/t.js';
 import {
   ROUTE_CONTACT,

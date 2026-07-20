@@ -1,4 +1,4 @@
-import { Router, Route } from 'grainlet';
+import { Router, Route } from 'grainlet/route';
 import { AppShell } from './design-system/layouts/AppChrome.jsx';
 import { AuthGuard } from './layout/AuthGuard.jsx';
 import { ToastHost } from './components/Toast.jsx';
@@ -70,8 +70,8 @@ export function App() {
           <Route path="/admin/cities/create" component={AdminCitiesPage} />
           <Route path="*" component={NotFoundPage} />
         </Router>
-        <ToastHost />
       </AppShell>
+      <ToastHost />
     </>
   );
 }

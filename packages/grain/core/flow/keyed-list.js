@@ -240,16 +240,10 @@ function mountRow(parentEl, owner, key, item, index, render, needsIndex) {
       if (!row.root) {
         row.root = createDom(vnode, owner, path);
         row.root.__grainKey = key;
-        if (row.root.nodeType === Node.ELEMENT_NODE) {
-          row.root.setAttribute('data-key', String(key));
-        }
         parentEl.appendChild(row.root);
       } else {
         row.root = patchDom(parentEl, row.root, vnode, owner, path);
         row.root.__grainKey = key;
-        if (row.root.nodeType === Node.ELEMENT_NODE) {
-          row.root.setAttribute('data-key', String(key));
-        }
       }
     } finally {
       setCurrentComponent(prev);

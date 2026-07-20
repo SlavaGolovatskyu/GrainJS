@@ -19,12 +19,15 @@ function buildData(n) {
   return a;
 }
 
+globalThis.__appRenderCount = 0;
+
 const App = createComponent(() => {
+  globalThis.__appRenderCount++;
   const [data, setData] = createSignal([]);
   const [selected, setSelected] = createSignal(null);
   globalThis.__setData = setData;
   globalThis.__setSelected = setSelected;
-  const rows = data();
+  // For owns `each` — App must not read data() here.
   return jsx(
     'div',
     { className: 'container' },
@@ -35,7 +38,7 @@ const App = createComponent(() => {
         'tbody',
         null,
         jsx(For, {
-          each: rows,
+          each: data,
           children: (row) =>
             jsx(
               'tr',
@@ -79,7 +82,12 @@ function countComponentHosts() {
   return root.querySelectorAll('.test-data [data-component]').length;
 }
 
+function getAppRenderCount() {
+  return globalThis.__appRenderCount;
+}
+
 try {
+  const rendersBefore = getAppRenderCount();
   __setData(buildData(1000));
   const trs = root.querySelectorAll('tbody tr').length;
   if (trs !== 1000) throw new Error(`expected 1000 rows, got ${trs}`);
@@ -90,12 +98,26 @@ try {
     throw new Error(`expected 1 data-component host under table, got ${hosts}`);
   }
 
+  if (getAppRenderCount() !== rendersBefore) {
+    throw new Error(
+      `App re-rendered on list set (${rendersBefore} → ${getAppRenderCount()}); For should own each`
+    );
+  }
+
+  __setData((d) => d.concat(buildData(100).map((r, i) => ({ ...r, id: 1000 + i + 1 }))));
+  if (root.querySelectorAll('tbody tr').length !== 1100) {
+    throw new Error('append failed');
+  }
+  if (getAppRenderCount() !== rendersBefore) {
+    throw new Error('App re-rendered on append; For should own each');
+  }
+
   __setData((d) =>
     d.map((row, i) =>
       i % 10 === 0 ? { id: row.id, label: row.label + ' !!!' } : row
     )
   );
-  if (root.querySelectorAll('tbody tr').length !== 1000) {
+  if (root.querySelectorAll('tbody tr').length !== 1100) {
     throw new Error('rows lost after update');
   }
 

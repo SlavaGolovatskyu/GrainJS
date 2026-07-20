@@ -1,4 +1,5 @@
-import { createSignal, createEffect, Link, navigate } from 'grainlet';
+import { createSignal, createEffect } from 'grainlet';
+import { Link, navigate } from 'grainlet/route';
 import {
   login,
   register,

@@ -1,11 +1,10 @@
 import {
   createSignal,
   createEffect,
-  Link,
-  navigate,
   For,
   Show,
 } from 'grainlet';
+import { Link, navigate } from 'grainlet/route';
 import {
   createAdminManualPoi,
   deleteAdminUser,

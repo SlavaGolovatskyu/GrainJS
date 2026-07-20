@@ -79,6 +79,21 @@ Infinite scroll on `VirtualList`:
 - `onEndReached` + simulated paged API
 - Appends picsum photos until `hasMore` is false
 
+### 21-forms-provider.html
+`grainlet/forms` FormProvider demo:
+- `rules` with `required`, `isEmail`, `minLength`, `equalsField`
+- `Field` + `ErrorMessage`, submit/reset, status banner
+
+### 22-forms-field-array.html
+`FieldArray` demo:
+- `push` / `remove` on a friends list
+- Per-row `validate={[required()]}`
+
+### 23-forms-i18n.html
+Translated validation messages:
+- Lazy `() => t('validation.required')` on built-in validators
+- EN / UK locale toggle without remounting the form
+
 ## Running the Examples
 
 1. Open any HTML file in a modern web browser

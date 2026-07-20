@@ -12,7 +12,10 @@ function grainletJsxSource() {
     name: 'grainlet-jsx-source',
     enforce: 'pre',
     transform(code, id) {
-      if (!id.includes('/implementations/grainlet/') || !/\.[cm]?[jt]sx$/.test(id)) {
+      if (
+        !/implementations[\\/]grainlet[\\/]/.test(id) ||
+        !/\.[cm]?[jt]sx$/.test(id)
+      ) {
         return null;
       }
       if (code.includes('@jsxImportSource')) return null;
@@ -27,7 +30,7 @@ function grainletJsxSource() {
 const grainOnly = {
   ...grain,
   async transform(code, id) {
-    if (!id.includes('/implementations/grainlet/')) return null;
+    if (!/implementations[\\/]grainlet[\\/]/.test(id)) return null;
     return grain.transform.call(this, code, id);
   },
 };
@@ -37,13 +40,13 @@ export default defineConfig({
     grainletJsxSource(),
     grainOnly,
     react({
-      include: [/\/implementations\/react\/.*\.[tj]sx?$/],
+      include: [/implementations[\\/]react[\\/].*\.[tj]sx?$/],
     }),
     preact({
-      include: [/\/implementations\/preact\/.*\.[tj]sx?$/],
+      include: [/implementations[\\/]preact[\\/].*\.[tj]sx?$/],
     }),
     solid({
-      include: [/\/implementations\/solid\/.*\.[tj]sx?$/],
+      include: [/implementations[\\/]solid[\\/].*\.[tj]sx?$/],
     }),
   ],
   server: {

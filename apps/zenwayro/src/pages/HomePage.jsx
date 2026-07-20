@@ -1,6 +1,14 @@
-import { createSignal, createEffect, Link } from 'grainlet';
-import { Button } from '../design-system/ui/button.jsx';
+import {
+  createSignal,
+  createEffect,
+  createMemo,
+  For,
+  Show,
+} from 'grainlet';
+import { Link } from 'grainlet/route';
 import { AppFooter } from '../design-system/layouts/AuthLayout.jsx';
+import { buttonVariants } from '../design-system/ui/button.jsx';
+import { cn } from '../design-system/utils/cn.js';
 import {
   IconArrowRight,
   IconChevronRight,
@@ -23,52 +31,43 @@ import {
   ROUTE_QUIZ,
   routePopularTripById,
 } from '../constants/routes.js';
+import {
+  HOME_HERO_IMAGE,
+  HOME_LANDING_FEATURES,
+  HOME_PLAN_STYLE_TAG_KEYS,
+  HOME_POPULAR_TRIPS_PREVIEW_LIMIT,
+  HOME_QUIZ_STYLE_TAG_KEYS,
+} from '../constants/product.js';
 import { resolveImageUrl } from '../utils/images.js';
-import { normalizeList } from '../utils/errors.js';
+import { normalizePopularTripsPayload } from '../utils/errors.js';
 
-/** Exact values from frontend HomePageV2.constants.ts */
-export const HOME_HERO_IMAGE = '/images/home_bg.webp';
-export const HOME_POPULAR_TRIPS_PREVIEW_LIMIT = 10;
-export const HOME_QUIZ_STYLE_TAG_KEYS = [
-  'home.quizTagFoodie',
-  'home.quizTagCulture',
-  'home.quizTagAdventure',
-  'home.quizTagRelaxed',
-];
-export const HOME_PLAN_STYLE_TAG_KEYS = [
-  'home.planTagWalking',
-  'home.planTagDayByDay',
-  'home.planTagLocal',
-  'home.planTagShare',
-];
-export const HOME_LANDING_FEATURES = [
-  {
-    iconKey: 'plan',
-    titleKey: 'home.landingFeaturePlanTitle',
-    descKey: 'home.landingFeaturePlanDesc',
-    iconClass: 'bg-[#0f1b3d]',
-  },
-  {
-    iconKey: 'explore',
-    titleKey: 'home.landingFeatureExploreTitle',
-    descKey: 'home.landingFeatureExploreDesc',
-    iconClass: 'bg-[#1e3a5f]',
-  },
-  {
-    iconKey: 'share',
-    titleKey: 'home.landingFeatureShareTitle',
-    descKey: 'home.landingFeatureShareDesc',
-    iconClass: 'coral-gradient',
-  },
-];
+const HOME_STAR_KEYS = [0, 1, 2, 3, 4];
 
 /**
  * Faithful Grain port of frontend HomePageV2.component.tsx — same structure & classes.
  */
 export function HomePage() {
   const token = useAuthToken();
-  const showAuthenticatedUi = Boolean(token()) || isAuthenticated();
   const [popularTrips, setPopularTrips] = createSignal([]);
+
+  const isPlanMode = createMemo(
+    () => Boolean(token()) || isAuthenticated()
+  );
+  const ctaHref = createMemo(() =>
+    isPlanMode() ? ROUTE_PLAN_NEW : ROUTE_QUIZ
+  );
+  const ctaLabel = createMemo(() =>
+    isPlanMode() ? t('nav.planTrip') : t('common.takeTheQuiz')
+  );
+  const cardTitleKey = createMemo(() =>
+    isPlanMode() ? 'home.planCardTitle' : 'home.quizCardTitle'
+  );
+  const cardSubtitleKey = createMemo(() =>
+    isPlanMode() ? 'home.planCardSubtitle' : 'home.quizCardSubtitle'
+  );
+  const cardTagKeys = createMemo(() =>
+    isPlanMode() ? HOME_PLAN_STYLE_TAG_KEYS : HOME_QUIZ_STYLE_TAG_KEYS
+  );
 
   createEffect(() => {
     let cancelled = false;
@@ -79,9 +78,7 @@ export function HomePage() {
     })
       .then((data) => {
         if (cancelled) return;
-        setPopularTrips(normalizeList(data, 'trips').length
-          ? normalizeList(data, 'trips')
-          : normalizeList(data, 'items'));
+        setPopularTrips(normalizePopularTripsPayload(data));
       })
       .catch(() => {
         if (!cancelled) setPopularTrips([]);
@@ -90,17 +87,6 @@ export function HomePage() {
       cancelled = true;
     };
   });
-
-  const isPlanMode = showAuthenticatedUi;
-  const ctaHref = isPlanMode ? ROUTE_PLAN_NEW : ROUTE_QUIZ;
-  const ctaLabel = isPlanMode ? t('nav.planTrip') : t('home.startQuiz');
-  const cardTitleKey = isPlanMode ? 'home.planCardTitle' : 'home.quizCardTitle';
-  const cardSubtitleKey = isPlanMode
-    ? 'home.planCardSubtitle'
-    : 'home.quizCardSubtitle';
-  const cardTagKeys = isPlanMode
-    ? HOME_PLAN_STYLE_TAG_KEYS
-    : HOME_QUIZ_STYLE_TAG_KEYS;
 
   return (
     <div class="min-h-full bg-background">
@@ -122,7 +108,17 @@ export function HomePage() {
               {t('common.appName')}
             </Link>
           </div>
-          {showAuthenticatedUi ? (
+          <Show
+            when={isPlanMode()}
+            fallback={
+              <Link
+                href={ROUTE_AUTH_SIGNIN}
+                class="text-sm font-medium text-white/80"
+              >
+                {t('nav.signIn')}
+              </Link>
+            }
+          >
             <button
               type="button"
               onClick={logout}
@@ -130,11 +126,7 @@ export function HomePage() {
             >
               {t('nav.signOut')}
             </button>
-          ) : (
-            <Link href={ROUTE_AUTH_SIGNIN} class="text-sm font-medium text-white/80">
-              {t('nav.signIn')}
-            </Link>
-          )}
+          </Show>
         </div>
 
         <div class="relative z-10 px-5 pb-8">
@@ -153,19 +145,24 @@ export function HomePage() {
           </p>
 
           <div class="flex flex-col gap-3">
-            <Link href={ctaHref}>
-              <Button class="h-auto w-full rounded-2xl border-0 py-6 text-base font-semibold text-white shadow-lg shadow-orange-900/30 coral-gradient hover:opacity-90">
-                <span>{ctaLabel}</span>
-                <IconChevronRight size={18} class="ml-1" />
-              </Button>
+            <Link
+              href={ctaHref()}
+              class={cn(
+                buttonVariants({ variant: 'default' }),
+                'h-auto w-full rounded-2xl border-0 py-6 text-base font-semibold text-white shadow-lg shadow-orange-900/30 coral-gradient hover:opacity-90'
+              )}
+            >
+              <span>{ctaLabel()}</span>
+              <IconChevronRight size={18} class="ml-1" />
             </Link>
-            <Link href={ROUTE_POPULAR_TRIPS}>
-              <Button
-                variant="outline"
-                class="h-auto w-full rounded-2xl border-white/40 bg-white/10 py-6 text-base font-semibold text-white backdrop-blur-sm hover:bg-white/20"
-              >
-                {t('nav.popularTrips')}
-              </Button>
+            <Link
+              href={ROUTE_POPULAR_TRIPS}
+              class={cn(
+                buttonVariants({ variant: 'outline' }),
+                'h-auto w-full rounded-2xl border-white/40 bg-white/10 py-6 text-base font-semibold text-white backdrop-blur-sm hover:bg-white/20'
+              )}
+            >
+              {t('nav.popularTrips')}
             </Link>
           </div>
         </div>
@@ -178,105 +175,144 @@ export function HomePage() {
               <IconStar size={18} class="text-white" />
             </div>
             <div>
-              <h3 class="text-base font-bold text-foreground">{t(cardTitleKey)}</h3>
-              <p class="mt-0.5 text-xs text-muted-foreground">{t(cardSubtitleKey)}</p>
+              <h3 class="text-base font-bold text-foreground">
+                {t(cardTitleKey())}
+              </h3>
+              <p class="mt-0.5 text-xs text-muted-foreground">
+                {t(cardSubtitleKey())}
+              </p>
             </div>
           </div>
           <div class="mb-4 flex flex-wrap gap-2">
-            {cardTagKeys.map((tagKey) => (
-              <span class="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-                {t(tagKey)}
-              </span>
-            ))}
+            <For each={cardTagKeys}>
+              {(tagKey) => (
+                <span class="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+                  {t(tagKey)}
+                </span>
+              )}
+            </For>
           </div>
-          <Link href={ctaHref}>
-            <Button class="h-auto w-full rounded-xl border-0 py-5 text-sm font-semibold text-white coral-gradient hover:opacity-90">
-              {ctaLabel} <IconArrowRight size={16} class="ml-1.5" />
-            </Button>
+          <Link
+            href={ctaHref()}
+            class={cn(
+              buttonVariants({ variant: 'default' }),
+              'h-auto w-full rounded-xl border-0 py-5 text-sm font-semibold text-white coral-gradient hover:opacity-90'
+            )}
+          >
+            {ctaLabel()} <IconArrowRight size={16} class="ml-1.5" />
           </Link>
         </div>
       </div>
 
-      {popularTrips().length > 0 ? (
+      <Show when={popularTrips().length > 0}>
         <section class="mt-8 px-5">
           <div class="mb-4 flex items-center justify-between">
-            <h2 class="text-xl font-bold text-foreground">{t('nav.popularTrips')}</h2>
-            <Link href={ROUTE_POPULAR_TRIPS} class="text-sm font-medium text-[#3b6fa0]">
+            <h2 class="text-xl font-bold text-foreground">
+              {t('nav.popularTrips')}
+            </h2>
+            <Link
+              href={ROUTE_POPULAR_TRIPS}
+              class="text-sm font-medium text-[#3b6fa0]"
+            >
               {t('home.seeAll')}
             </Link>
           </div>
           <div class="no-scrollbar flex gap-3 overflow-x-auto pb-2">
-            {popularTrips().map((trip) => {
-              const cityName = trip.city || trip.title || 'Trip';
-              const title =
-                String(cityName).charAt(0).toUpperCase() + String(cityName).slice(1);
-              const heroUrl = resolveImageUrl(
-                (trip.cityImageCdnUrl || trip.imageUrl || '').trim()
-              );
-              const days = trip.durationDays || 1;
-              const daysLabel =
-                days === 1
-                  ? t('popularTrips.daysSingular')
-                  : t('popularTrips.daysTag', { count: String(days) });
+            <For each={popularTrips}>
+              {(trip) => {
+                const cityName = trip.city || trip.title || 'Trip';
+                const title =
+                  String(cityName).charAt(0).toUpperCase() +
+                  String(cityName).slice(1);
+                const heroUrl = resolveImageUrl(
+                  (trip.cityImageCdnUrl || trip.imageUrl || '').trim()
+                );
+                const days = trip.durationDays || 1;
+                const daysLabel =
+                  days === 1
+                    ? t('popularTrips.daysSingular')
+                    : t('popularTrips.daysTag', { count: String(days) });
 
-              return (
-                <Link
-                  href={routePopularTripById(trip.id)}
-                  class="relative h-56 w-44 shrink-0 overflow-hidden rounded-2xl bg-muted shadow-md"
-                >
-                  {heroUrl ? (
-                    <img src={heroUrl} alt="" class="h-full w-full object-cover" />
-                  ) : (
-                    <div class="flex h-full w-full items-center justify-center bg-[#1e3a5f] text-3xl font-bold text-white">
-                      {title.charAt(0)}
+                return (
+                  <Link
+                    href={routePopularTripById(trip.id)}
+                    class="relative h-56 w-44 shrink-0 overflow-hidden rounded-2xl bg-muted shadow-md"
+                  >
+                    <Show
+                      when={heroUrl}
+                      fallback={
+                        <div class="flex h-full w-full items-center justify-center bg-[#1e3a5f] text-3xl font-bold text-white">
+                          {title.charAt(0)}
+                        </div>
+                      }
+                    >
+                      <img
+                        src={heroUrl}
+                        alt=""
+                        class="h-full w-full object-cover"
+                      />
+                    </Show>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                    <div class="absolute bottom-0 left-0 right-0 p-3">
+                      <p class="text-base font-bold text-white">{title}</p>
+                      <span class="mt-1 inline-block rounded-full bg-[#ff6b4a]/90 px-2 py-0.5 text-xs font-semibold text-white">
+                        {daysLabel}
+                      </span>
                     </div>
-                  )}
-                  <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                  <div class="absolute bottom-0 left-0 right-0 p-3">
-                    <p class="text-base font-bold text-white">{title}</p>
-                    <span class="mt-1 inline-block rounded-full bg-[#ff6b4a]/90 px-2 py-0.5 text-xs font-semibold text-white">
-                      {daysLabel}
-                    </span>
-                  </div>
-                </Link>
-              );
-            })}
+                  </Link>
+                );
+              }}
+            </For>
           </div>
         </section>
-      ) : null}
+      </Show>
 
       <section class="mt-10 px-5">
-        <h2 class="mb-5 text-xl font-bold text-foreground">{t('home.whyZenwayro')}</h2>
+        <h2 class="mb-5 text-xl font-bold text-foreground">
+          {t('home.whyZenwayro')}
+        </h2>
         <div class="flex flex-col gap-4">
-          {HOME_LANDING_FEATURES.map(({ iconKey, titleKey, descKey, iconClass }) => {
-            const Icon =
-              iconKey === 'share'
-                ? IconShare
-                : iconKey === 'explore'
-                  ? IconStar
-                  : IconMap;
-            return (
-              <div class="flex items-start gap-4 rounded-2xl border border-border bg-card p-5">
-                <div
-                  class={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${iconClass}`}
-                >
-                  <Icon size={20} class="text-white" />
+          <For each={HOME_LANDING_FEATURES}>
+            {({ iconKey, titleKey, descKey, iconClass }) => {
+              const Icon =
+                iconKey === 'share'
+                  ? IconShare
+                  : iconKey === 'explore'
+                    ? IconStar
+                    : IconMap;
+              return (
+                <div class="flex items-start gap-4 rounded-2xl border border-border bg-card p-5">
+                  <div
+                    class={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${iconClass}`}
+                  >
+                    <Icon size={20} class="text-white" />
+                  </div>
+                  <div>
+                    <h3 class="mb-1 text-base font-bold text-foreground">
+                      {t(titleKey)}
+                    </h3>
+                    <p class="text-sm leading-relaxed text-muted-foreground">
+                      {t(descKey)}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 class="mb-1 text-base font-bold text-foreground">{t(titleKey)}</h3>
-                  <p class="text-sm leading-relaxed text-muted-foreground">{t(descKey)}</p>
-                </div>
-              </div>
-            );
-          })}
+              );
+            }}
+          </For>
         </div>
       </section>
 
       <section class="mx-5 mb-4 mt-8 rounded-3xl p-5 text-center voyage-gradient">
         <div class="mb-2 flex justify-center gap-1">
-          {[0, 1, 2, 3, 4].map(() => (
-            <IconStar size={16} class="fill-[#ff6b4a] text-[#ff6b4a]" fill="#ff6b4a" />
-          ))}
+          <For each={HOME_STAR_KEYS}>
+            {() => (
+              <IconStar
+                size={16}
+                class="fill-[#ff6b4a] text-[#ff6b4a]"
+                fill="#ff6b4a"
+              />
+            )}
+          </For>
         </div>
         <p class="mb-1 text-sm font-medium text-white/90">
           “{t('home.socialProofQuote')}”

@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'grainlet';
+import { Link, useLocation } from 'grainlet/route';
 import { cn } from '../utils/cn.js';
 import {
   APP_SHELL_FOOTER_CLASSES,

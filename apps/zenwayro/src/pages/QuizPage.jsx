@@ -1,4 +1,5 @@
-import { createSignal, navigate } from 'grainlet';
+import { createSignal } from 'grainlet';
+import { navigate } from 'grainlet/route';
 import { Button } from '../design-system/ui/button.jsx';
 import {
   Tag,

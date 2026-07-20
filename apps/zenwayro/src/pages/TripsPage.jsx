@@ -1,8 +1,5 @@
-import {
-  createSignal,
-  createEffect,
-  Link,
-} from 'grainlet';
+import { createSignal, createEffect } from 'grainlet';
+import { Link } from 'grainlet/route';
 import {
   acceptInvitation,
   fetchPendingInvitations,

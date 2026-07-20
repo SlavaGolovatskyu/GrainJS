@@ -1,12 +1,10 @@
 import {
   createSignal,
   createEffect,
-  Link,
-  navigate,
-  useParams,
   For,
   Show,
 } from 'grainlet';
+import { Link, navigate, useParams } from 'grainlet/route';
 import {
   copyPopularTrip,
   fetchPopularCountries,
@@ -28,17 +26,10 @@ import { Button } from '../design-system/ui/button.jsx';
 import { Input } from '../design-system/ui/input.jsx';
 import { IconStar } from '../design-system/icons.jsx';
 import { toast } from '../components/Toast.jsx';
-import { getErrorMessage, normalizeList } from '../utils/errors.js';
-
-function normalizePopularTripsPayload(data) {
-  if (!data) return [];
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data.items)) return data.items;
-  if (Array.isArray(data.trips)) return data.trips;
-  if (Array.isArray(data.results)) return data.results;
-  if (Array.isArray(data.data)) return data.data;
-  return normalizeList(data);
-}
+import {
+  getErrorMessage,
+  normalizePopularTripsPayload,
+} from '../utils/errors.js';
 
 function tripCity(trip) {
   const raw = trip.city || trip.title || trip.name || 'Trip';

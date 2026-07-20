@@ -2,7 +2,7 @@ export const APP_SHELL_ROOT_CLASSES =
   'zenwayro-v2-ui flex flex-col flex-1 min-h-0 h-full min-h-screen bg-background text-foreground';
 export const APP_SHELL_HEADER_CLASSES = 'shrink-0 z-40';
 export const APP_SHELL_MAIN_CLASSES =
-  'flex-1 min-h-0 overflow-auto pb-[calc(4rem+env(safe-area-inset-bottom,0px)+0.75rem)]';
+  'relative flex flex-1 min-h-0 flex-col overflow-auto pb-[calc(4rem+env(safe-area-inset-bottom,0px)+0.75rem)]';
 export const APP_SHELL_FOOTER_CLASSES = 'shrink-0';
 
 export const APP_NAVBAR_ROOT_CLASSES =
@@ -13,6 +13,7 @@ export const EUROPE_MAP_ZOOM = 4;
 export const CITY_MAP_ZOOM = 13;
 
 export const HOME_HERO_IMAGE = '/images/home_bg.webp';
+export const HOME_POPULAR_TRIPS_PREVIEW_LIMIT = 10;
 
 export const HOME_QUIZ_STYLE_TAG_KEYS = [
   'home.quizTagFoodie',

@@ -50,6 +50,9 @@ Only example `08-jsx-counter.html` works without a build tool (uses `jsx()` func
 | 10 | `10-nested-render-isolation.html` | Deep nesting; only owning leaf re-renders | ✅ Yes |
 | 11 | `11-async-requests.html` | async/await fetch, debounce, AbortController | ✅ Yes |
 | 12 | `12-routing.html` | History API router — open **`/routing`** | ✅ Yes |
+| 21 | `21-forms-provider.html` | `grainlet/forms` FormProvider + rules | ✅ Yes |
+| 22 | `22-forms-field-array.html` | `FieldArray` push / remove | ✅ Yes |
+| 23 | `23-forms-i18n.html` | Lazy i18n validator messages (EN/UK) | ✅ Yes |
 
 ## Troubleshooting
 

@@ -36,10 +36,6 @@ export function App() {
   const swapMany = () => setData((d) => swapManyPairs(d, 100));
   const remove = (id) => setData((d) => d.filter((row) => row.id !== id));
 
-  // Read during render so App's effect re-runs when the list changes.
-  // (each={data()} is wrapped to an accessor by grainJsx, which would skip App tracking.)
-  const rows = data();
-
   return (
     <div class="container">
       <div class="jumbotron">
@@ -115,7 +111,7 @@ export function App() {
       </div>
       <table class="table table-hover table-striped test-data">
         <tbody>
-          <For each={rows}>
+          <For each={data}>
             {(row) => (
               <tr
                 class={selected() === row.id ? 'danger' : ''}

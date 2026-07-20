@@ -42,6 +42,14 @@ export const routePlanNewWithCity = (city, cityId) => {
   return s ? `${ROUTE_PLAN_NEW}?${s}` : ROUTE_PLAN_NEW;
 };
 
+export const routeExploreWithCity = (city, cityId) => {
+  const qs = new URLSearchParams();
+  if (city) qs.set('city', city);
+  if (cityId) qs.set('cityId', cityId);
+  const s = qs.toString();
+  return s ? `${ROUTE_EXPLORE}?${s}` : ROUTE_EXPLORE;
+};
+
 const PUBLIC_EXACT = [
   ROUTE_HOME,
   ROUTE_TERMS,

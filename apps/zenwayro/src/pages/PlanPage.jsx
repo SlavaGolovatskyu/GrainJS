@@ -1,4 +1,5 @@
-import { createSignal, createEffect, useParams, Link } from 'grainlet';
+import { createSignal, createEffect } from 'grainlet';
+import { Link, useParams } from 'grainlet/route';
 import { MapView } from '../components/MapView.jsx';
 import { Button } from '../design-system/ui/button.jsx';
 import {

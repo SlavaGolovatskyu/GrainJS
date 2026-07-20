@@ -11,13 +11,19 @@ import {
   mergeComponentProps,
 } from '../shared/vnode.js';
 import { createContentsHost } from './hosts.js';
-
-const LISTENERS = Symbol('listeners');
-const PREV_PROPS = Symbol('prevProps');
-const TEXT_DISPOSE = Symbol('textDispose');
-const PROP_DISPOSES = Symbol('propDisposes');
-const NODE_KEY = Symbol('nodeKey');
-const REF_KEY = Symbol('ref');
+import {
+  isGrainTemplate,
+  instantiateTemplate,
+  refreshTemplate,
+} from './template.js';
+import {
+  LISTENERS,
+  PREV_PROPS,
+  TEXT_DISPOSE,
+  PROP_DISPOSES,
+  NODE_KEY,
+  REF_KEY,
+} from './binding-keys.js';
 
 function invokeRef(ref, el) {
   if (typeof ref === 'function') ref(el);
@@ -69,6 +75,12 @@ function disposeNodeBindings(node) {
       dispose();
     }
     node[PROP_DISPOSES].clear();
+  }
+  if (node?.[LISTENERS]) {
+    for (const [ev, fn] of node[LISTENERS]) {
+      node.removeEventListener(ev, fn);
+    }
+    node[LISTENERS].clear();
   }
   clearRefTree(node);
 }
@@ -198,7 +210,13 @@ function disposePropBinding(el, key) {
 
 function setStaticProp(el, key, value) {
   if (key === 'className' || key === 'class') {
-    el.className = value == null ? '' : String(value);
+    const next = value == null ? '' : String(value);
+    if (typeof SVGElement !== 'undefined' && el instanceof SVGElement) {
+      if (next) el.setAttribute('class', next);
+      else el.removeAttribute('class');
+    } else {
+      el.className = next;
+    }
     return;
   }
 
@@ -273,7 +291,11 @@ export function applyProps(el, props, owner) {
       } else {
         disposePropBinding(el, key);
         if (key === 'className' || key === 'class') {
-          el.className = '';
+          if (typeof SVGElement !== 'undefined' && el instanceof SVGElement) {
+            el.removeAttribute('class');
+          } else {
+            el.className = '';
+          }
         } else if (key === 'id') {
           el.id = '';
         } else if (BOOLEAN_ATTRS.has(key)) {
@@ -398,6 +420,10 @@ export function createDom(vdom, owner, path = '0') {
     return createAccessorChild(vdom, owner, path);
   }
 
+  if (isGrainTemplate(vdom)) {
+    return instantiateTemplate(vdom);
+  }
+
   if (Array.isArray(vdom)) {
     const host = createContentsHost('data-fg', 'fragment');
     appendVdomChildren(host, vdom, owner, path);
@@ -473,6 +499,14 @@ export function patchDom(parent, oldDom, newVdom, owner, path = '0') {
     disposeTextBinding(oldDom);
     const empty = document.createTextNode('');
     return replaceNode(parent, oldDom, empty);
+  }
+
+  if (isGrainTemplate(newVdom)) {
+    if (oldDom && oldDom.nodeType === Node.ELEMENT_NODE) {
+      return refreshTemplate(oldDom, newVdom);
+    }
+    clearChildRange(owner, path);
+    return replaceNode(parent, oldDom, instantiateTemplate(newVdom));
   }
 
   if (isAccessor(newVdom)) {

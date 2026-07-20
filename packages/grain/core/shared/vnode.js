@@ -49,6 +49,9 @@ export function vnodeKey(vdom) {
 /** Accessor / expression results that are vnodes or arrays (not plain text). */
 export function isStructuredChild(value) {
   if (Array.isArray(value)) return true;
+  if (value != null && typeof value === 'object' && value.$$grainTemplate) {
+    return true;
+  }
   return value != null && typeof value === 'object' && 'type' in value;
 }
 

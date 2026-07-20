@@ -9,3 +9,4 @@ apps/zenwayro
 ./apps/zenwayro
 ./apps/zenwayro/
 .env
+.cursor

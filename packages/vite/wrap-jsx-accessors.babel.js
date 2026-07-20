@@ -36,6 +36,9 @@ function isEventAttrName(name) {
   return name === 'onclick' || name === 'onClick' || /^on[A-Z]/.test(name);
 }
 
+/** Control-flow props owned by For/Show/Switch — do not wrap call expressions. */
+const CONTROL_FLOW_ATTRS = new Set(['each', 'when']);
+
 export default function wrapJsxAccessors({ types: t }) {
   function shouldWrap(exprPath) {
     const expr = exprPath.node;
@@ -105,6 +108,20 @@ export default function wrapJsxAccessors({ types: t }) {
             : nameNode?.name;
 
           if (isEventAttrName(attrName)) return;
+
+          // For/Show/Match: wrap each={data()} → () => data() so For owns the
+          // subscription via readProp (eager each={data()} would freeze the list).
+          // Do NOT wrap identifiers or props.x — those are already accessors;
+          // wrapping each={props.cities} → () => props.cities makes readProp
+          // return the getter function, and normalizeEach treats it as one item.
+          if (CONTROL_FLOW_ATTRS.has(attrName)) {
+            const cfExpr = path.get('expression');
+            if (cfExpr.isJSXEmptyExpression()) return;
+            if (cfExpr.isIdentifier() || cfExpr.isMemberExpression()) return;
+            if (!shouldWrap(cfExpr)) return;
+            cfExpr.replaceWith(wrap(cfExpr.node));
+            return;
+          }
 
           // Refs: never wrap; rewrite bare identifiers to assignment callbacks.
           if (attrName === 'ref') {

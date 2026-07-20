@@ -23,11 +23,11 @@ const FRAMEWORKS = [
     name: 'Preact',
     load: () => import('./implementations/preact/mount.js'),
   },
-  // {
-  //   id: 'solid',
-  //   name: 'Solid',
-  //   load: () => import('./implementations/solid/mount.jsx'),
-  // },
+  {
+    id: 'solid',
+    name: 'Solid',
+    load: () => import('./implementations/solid/mount.jsx'),
+  },
 ];
 
 const appRoot = document.getElementById('app');
